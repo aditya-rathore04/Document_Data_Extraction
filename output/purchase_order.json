@@ -3,7 +3,7 @@
   "vendor_name": "Jeff J Ritchie",
   "vendor_address": "Sacramento, CA 95815",
   "customer_name": null,
-  "customer_address": "White City, KS 66872",
+  "customer_address": null,
   "document_id": "PO-001",
   "date": "2020-10-20",
   "due_date": null,

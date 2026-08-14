@@ -1,0 +1,66 @@
+{
+  "document_type": "receipt",
+  "vendor_name": "Adress: 1234 Lorem Ipsum, Dolor",
+  "vendor_address": null,
+  "customer_name": null,
+  "customer_address": null,
+  "document_id": null,
+  "date": "2018-01-01",
+  "due_date": null,
+  "line_items": [
+    {
+      "description": "Lorem 6.50",
+      "quantity": null,
+      "unit_price": 6.5,
+      "total": 6.5
+    },
+    {
+      "description": "Ipsum 7.50",
+      "quantity": null,
+      "unit_price": 7.5,
+      "total": 7.5
+    },
+    {
+      "description": "Dolor Sit 48.00",
+      "quantity": null,
+      "unit_price": 48.0,
+      "total": 48.0
+    },
+    {
+      "description": "Amet 9.30",
+      "quantity": null,
+      "unit_price": 9.3,
+      "total": 9.3
+    },
+    {
+      "description": "Consectetur 11.90",
+      "quantity": null,
+      "unit_price": 11.9,
+      "total": 11.9
+    },
+    {
+      "description": "Adipiscing Elit 1.20",
+      "quantity": null,
+      "unit_price": 1.2,
+      "total": 1.2
+    },
+    {
+      "description": "Sed Do 0.40",
+      "quantity": null,
+      "unit_price": 0.4,
+      "total": 0.4
+    }
+  ],
+  "subtotal": 84.8,
+  "tax": null,
+  "shipping": null,
+  "discount": null,
+  "total": 84.8,
+  "currency": "USD",
+  "payment_method": "Cash",
+  "notes": null,
+  "validation": {
+    "is_valid": true,
+    "issues": []
+  }
+}

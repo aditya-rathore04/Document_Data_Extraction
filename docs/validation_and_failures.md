@@ -49,6 +49,10 @@ Real-world document extraction faces edge cases inherent in computer vision, OCR
 - **Symptom**: "PAID" rubber stamps or handwritten notes overlapping total boxes.
 - **How the Agent Handles It**: `glm-ocr` treats stamps as text; if an overlapping stamp corrupts the OCR digits of the total amount, the subtotal vs grand total check fails and reports the discrepancy in `issues[]`.
 
+### Case 6: Split Tax & Multi-Component Levies (e.g., Indian GST: CGST 9% + SGST 9%)
+- **Symptom**: Invoices with multi-part tax structures (such as Subtotal ₹100,000 + CGST ₹9,000 + SGST ₹9,000 = Grand Total ₹118,000). A standard single-tax schema prompt may map only the first tax line (₹9,000) and drop the second.
+- **How the Validator Catches It**: The **Grand Total Consistency** check computes $\text{Base (100,000)} + \text{Tax (9,000)} = \text{109,000} \neq \text{118,000}$ and flags an immediate error. Rather than silently inserting a mathematical lie into an ERP or accounting system, the validation layer alerts the reviewer to the exact ₹9,000 unmapped tax component!
+
 ---
 
 ## 3. Self-Correction & Discrepancy Reporting

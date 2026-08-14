@@ -1,0 +1,141 @@
+{
+  "document_type": "unknown",
+  "vendor_name": null,
+  "vendor_address": null,
+  "customer_name": null,
+  "customer_address": null,
+  "document_id": null,
+  "date": null,
+  "due_date": null,
+  "line_items": [
+    {
+      "description": "Social Media Page",
+      "quantity": 31.0,
+      "unit_price": 120.0,
+      "total": 3720.0
+    },
+    {
+      "description": "AWS Server Setup",
+      "quantity": 8.0,
+      "unit_price": 60.0,
+      "total": 480.0
+    },
+    {
+      "description": "Social Media Page",
+      "quantity": 34.0,
+      "unit_price": 45.0,
+      "total": 1530.0
+    },
+    {
+      "description": "App Design",
+      "quantity": 13.0,
+      "unit_price": 45.0,
+      "total": 585.0
+    },
+    {
+      "description": "IT Consulting",
+      "quantity": 6.0,
+      "unit_price": 60.0,
+      "total": 360.0
+    },
+    {
+      "description": "Software Development",
+      "quantity": 31.0,
+      "unit_price": 20.0,
+      "total": 620.0
+    },
+    {
+      "description": "App Design",
+      "quantity": 5.0,
+      "unit_price": 20.0,
+      "total": 100.0
+    },
+    {
+      "description": "App Design",
+      "quantity": 6.0,
+      "unit_price": 80.0,
+      "total": 480.0
+    },
+    {
+      "description": "AWS Server Setup",
+      "quantity": 7.0,
+      "unit_price": 80.0,
+      "total": 560.0
+    },
+    {
+      "description": "Social Media Page",
+      "quantity": 33.0,
+      "unit_price": 120.0,
+      "total": 3960.0
+    },
+    {
+      "description": "Jersey",
+      "quantity": 3.0,
+      "unit_price": 45.0,
+      "total": 135.0
+    },
+    {
+      "description": "Brand Guide",
+      "quantity": 8.0,
+      "unit_price": 60.0,
+      "total": 480.0
+    },
+    {
+      "description": "AWS Server Setup",
+      "quantity": 32.0,
+      "unit_price": 120.0,
+      "total": 3840.0
+    },
+    {
+      "description": "Flyer",
+      "quantity": 30.0,
+      "unit_price": 20.0,
+      "total": 600.0
+    },
+    {
+      "description": "Business Card",
+      "quantity": 32.0,
+      "unit_price": 120.0,
+      "total": 3840.0
+    },
+    {
+      "description": "Social Media Page",
+      "quantity": 30.0,
+      "unit_price": 80.0,
+      "total": 2400.0
+    },
+    {
+      "description": "Business Card",
+      "quantity": 13.0,
+      "unit_price": 45.0,
+      "total": 585.0
+    }
+  ],
+  "subtotal": 8975.0,
+  "tax": null,
+  "shipping": null,
+  "discount": null,
+  "total": 8975.0,
+  "currency": null,
+  "payment_method": null,
+  "notes": null,
+  "validation": {
+    "is_valid": false,
+    "issues": [
+      {
+        "field": "document_type",
+        "severity": "warning",
+        "message": "Document type could not be classified (invoice, receipt, or purchase_order).",
+        "expected": "invoice | receipt | purchase_order",
+        "actual": "unknown"
+      },
+      {
+        "field": "subtotal",
+        "severity": "error",
+        "message": "Subtotal mismatch: Sum of extracted line items (24275.00) does not equal extracted subtotal (8975.00).",
+        "expected": "24275.00",
+        "actual": "8975.00"
+      }
+    ]
+  }
+}
