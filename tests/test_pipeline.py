@@ -15,7 +15,7 @@ def test_document_loader():
     assert len(pdf_doc.text_content) > 10
 
     # 2. Test Image loading (treated as visual document)
-    img_doc = load_document(samples_dir / "receipt.jpg")
+    img_doc = load_document(samples_dir / "McDonalds_receipt.jpg")
     assert not img_doc.is_text
     assert img_doc.page_count == 1
     assert len(img_doc.images) == 1
@@ -124,3 +124,36 @@ def test_validator_null_safe_receipt():
     )
     result = validate_document(doc)
     assert result.is_valid is True
+
+
+def test_validator_shipping_and_discount_math():
+    """Verify validator correctly computes subtotal + tax + shipping - discount = total."""
+    doc = DocumentExtraction(
+        document_type="purchase_order",
+        document_id="PO-777",
+        date="2024-05-10",
+        line_items=[
+            LineItem(description="Parts", quantity=1, unit_price=100.0, total=100.0),
+        ],
+        subtotal=100.0,
+        tax=10.0,
+        shipping=15.0,
+        discount=5.0,
+        total=120.0,  # 100 + 10 + 15 - 5 = 120
+    )
+    result = validate_document(doc)
+    assert result.is_valid is True
+    assert len(result.issues) == 0
+
+
+def test_structure_client_html_preprocessor():
+    """Verify HTML table preprocessor cleans HTML entities and tags into markdown lines."""
+    from src.structure_client import StructureClient
+
+    client = StructureClient()
+    raw_html = "<table><tr><td>Item &amp; Service</td><td>$50.00</td></tr></table>"
+    cleaned = client._preprocess_ocr_text(raw_html)
+    assert "Item & Service" in cleaned
+    assert "50.00" in cleaned
+    assert "<table" not in cleaned
+

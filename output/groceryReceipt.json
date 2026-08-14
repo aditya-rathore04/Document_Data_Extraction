@@ -4,7 +4,7 @@
   "vendor_address": "123 Harvest Avenue, Springfield, IL 62701",
   "customer_name": null,
   "customer_address": null,
-  "document_id": "Receipt #: 984210",
+  "document_id": "984210",
   "date": "2026-08-14",
   "due_date": null,
   "line_items": [
@@ -63,8 +63,8 @@
   "discount": null,
   "total": 43.41,
   "currency": "USD",
-  "payment_method": "Card: VISA (ending in 4821)",
-  "notes": "PAYMENT METHOD:\nCard: VISA (ending in 4821)\nAuth Code: 049812\nAmount Paid: $43.41\nChange Due: $0.00\nTotal Items Sold: 9",
+  "payment_method": "VISA (ending in 4821)",
+  "notes": "THANK YOU FOR SHOPPING! Keep receipt for returns within 30 days. Visit us at www.freshmarket.com",
   "validation": {
     "is_valid": true,
     "issues": []

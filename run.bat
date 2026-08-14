@@ -4,7 +4,7 @@ echo   Document Data Extractor Agent Runner
 echo ==============================================
 
 echo Checking / pulling Ollama models...
-ollama pull glm-ocr
+ollama pull glm-ocr:q8_0
 ollama pull qwen2.5:3b
 
 echo Installing dependencies...

@@ -1,18 +1,23 @@
 #!/bin/bash
 set -e
 
-echo "=== Document Data Extractor Agent ==="
-echo "Pulling required Ollama models (if missing)..."
-ollama pull glm-ocr 2>/dev/null || true
-ollama pull qwen2.5:3b 2>/dev/null || true
+echo "=============================================="
+echo "  Document Data Extractor Agent Runner"
+echo "=============================================="
 
-echo "Installing Python dependencies..."
+echo "Checking / pulling Ollama models..."
+ollama pull glm-ocr:q8_0
+ollama pull qwen2.5:3b
+
+echo "Installing dependencies..."
 pip install -r requirements.txt --quiet
 
-echo "Running end-to-end extraction on all sample documents..."
+echo "Running extraction on all sample documents..."
 python main.py extract-all
 
 echo ""
-echo "Extraction completed successfully!"
-echo "• See 'output/' for generated JSON files with embedded validation reports."
-echo "• See 'docs/validation_and_failures.md' for validation logic and failure case notes."
+echo "=============================================="
+echo "Extraction Complete!"
+echo "Outputs saved to: output/"
+echo "Documentation: docs/validation_and_failures.md"
+echo "=============================================="

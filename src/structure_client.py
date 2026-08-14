@@ -42,9 +42,10 @@ Critical Extraction Rules:
 1. Return ONLY the raw JSON object. Do not wrap in markdown quotes if possible, and do not include conversational text.
 2. Grouping & Line Items: For each numbered item (01, 02, 03, etc.), extract ONE line item where "description" is the full service/item name. The value in the PRICE/final column (e.g. $72.25, $46.75, $30.60) is the line item "total". Do NOT create separate line items for sub-bullet descriptions.
 3. Subtotal & Discount: Set "subtotal" to the subtotal amount (e.g. 149.60 or 176.00). If there is a discount, extract it as a POSITIVE number (e.g. 26.40, NEVER -26.40).
-4. Document Type: If the document is a store receipt or customer bill (or has "RECEIPT" header), set "document_type" to "receipt".
-5. Clean numeric fields: values must be pure numbers without currency symbols (e.g. 157.08, not "$157.08 CAD").
-6. Standardize dates to YYYY-MM-DD whenever discernible.
+4. Tax & Split Taxes: If multiple tax lines exist (e.g. CGST 9000 + SGST 9000, or State + Federal Tax), sum all tax amounts together into the "tax" field (e.g. 18000.0).
+5. Document Type: If the document is a store receipt or customer bill (or has "RECEIPT" header), set "document_type" to "receipt".
+6. Clean numeric fields: values must be pure numbers without currency symbols (e.g. 157.08, not "$157.08 CAD").
+7. Standardize dates to YYYY-MM-DD whenever discernible.
 """
 
 
