@@ -33,12 +33,45 @@ class LoadedDocument:
         )
 
 
+def _load_excel_as_markdown(file_path: Path) -> str:
+    """Reads Excel workbook (.xlsx, .xls) and converts all non-empty content into clean, compact text tables."""
+    try:
+        import openpyxl
+
+        wb = openpyxl.load_workbook(file_path, data_only=True)
+        sheet_sections = []
+
+        for sheet_name in wb.sheetnames:
+            ws = wb[sheet_name]
+            rows = list(ws.iter_rows(values_only=True))
+
+            cleaned_rows = []
+            for row in rows:
+                # Filter out None and empty string cells
+                cells = [str(c).strip() for c in row if c is not None and str(c).strip() not in ["", "None"]]
+                if cells and not all(c in ["0", "0.0", "None", ""] for c in cells):
+                    cleaned_rows.append(" | ".join(cells))
+
+            if not cleaned_rows:
+                continue
+
+            section = [f"### Sheet: {sheet_name}"]
+            section.extend(cleaned_rows)
+            sheet_sections.append("\n".join(section))
+
+        wb.close()
+        return "\n\n".join(sheet_sections)
+    except Exception as e:
+        raise ValueError(f"Failed to read Excel spreadsheet '{file_path.name}': {e}")
+
+
 def load_document(file_path: Union[str, Path], dpi: int = 120) -> LoadedDocument:
     """
-    Loads a PDF, image, or text file and converts it into standard format:
-    - PDF: Renders pages into PIL Images at specified DPI (default 120).
-    - Image: Opens as PIL Image (converted to RGB).
-    - Text/CSV: Reads raw text directly.
+    Loads a PDF, image, Excel spreadsheet, or text file and converts it into standard format:
+    - Text/CSV/MD: Reads raw text directly (is_text=True).
+    - Excel (.xlsx, .xls): Converts sheets into Markdown tables (is_text=True).
+    - PDF: Extracts vector text layer (is_text=True) or renders pages as PIL images for OCR (is_text=False).
+    - Image: Opens as PIL Image for OCR (is_text=False).
     """
     path = Path(file_path)
     if not path.exists():
@@ -46,13 +79,18 @@ def load_document(file_path: Union[str, Path], dpi: int = 120) -> LoadedDocument
 
     ext = path.suffix.lower()
 
-    # 1. Text or CSV file
-    if ext in [".txt", ".csv", ".tsv"]:
+    # 1. Text, CSV, Markdown, JSON, TSV files
+    if ext in [".txt", ".csv", ".tsv", ".md", ".json", ".log"]:
         with open(path, "r", encoding="utf-8", errors="replace") as f:
             content = f.read()
         return LoadedDocument(file_path=path, is_text=True, text_content=content)
 
-    # 2. PDF Document
+    # 2. Excel spreadsheets (.xlsx, .xls)
+    if ext in [".xlsx", ".xls", ".xlsm"]:
+        excel_text = _load_excel_as_markdown(path)
+        return LoadedDocument(file_path=path, is_text=True, text_content=excel_text)
+
+    # 3. PDF Document
     if ext == ".pdf":
         doc = pymupdf.open(path)
         extracted_text_pages: List[str] = []
@@ -85,7 +123,7 @@ def load_document(file_path: Union[str, Path], dpi: int = 120) -> LoadedDocument
         # Scanned PDF without text layer: return rendered images for OCR
         return LoadedDocument(file_path=path, is_text=False, images=images)
 
-    # 3. Image file
+    # 4. Image file
     if ext in [".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tiff"]:
         img = Image.open(path).convert("RGB")
         return LoadedDocument(file_path=path, is_text=False, images=[img])

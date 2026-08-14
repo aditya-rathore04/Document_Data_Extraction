@@ -1,0 +1,72 @@
+{
+  "document_type": "receipt",
+  "vendor_name": "FRESH MARKET GROCERY",
+  "vendor_address": "123 Harvest Avenue, Springfield, IL 62701",
+  "customer_name": null,
+  "customer_address": null,
+  "document_id": "Receipt #: 984210",
+  "date": "2026-08-14",
+  "due_date": null,
+  "line_items": [
+    {
+      "description": "Organic Whole Milk (1 gal)",
+      "quantity": 1.0,
+      "unit_price": 4.29,
+      "total": 4.29
+    },
+    {
+      "description": "Whole Wheat Bread",
+      "quantity": 1.0,
+      "unit_price": 2.99,
+      "total": 2.99
+    },
+    {
+      "description": "Large Brown Eggs (12 pk)",
+      "quantity": 1.0,
+      "unit_price": 3.89,
+      "total": 3.89
+    },
+    {
+      "description": "Honeycrisp Apples (2.1 lb)",
+      "quantity": 1.0,
+      "unit_price": 5.23,
+      "total": 5.23
+    },
+    {
+      "description": "Boneless Chicken Breast",
+      "quantity": 1.0,
+      "unit_price": 8.99,
+      "total": 8.99
+    },
+    {
+      "description": "Olive Oil (500 ml)",
+      "quantity": 1.0,
+      "unit_price": 7.49,
+      "total": 7.49
+    },
+    {
+      "description": "Baby Spinach (16 oz)",
+      "quantity": 1.0,
+      "unit_price": 3.49,
+      "total": 3.49
+    },
+    {
+      "description": "Dark Chocolate Bar",
+      "quantity": 2.0,
+      "unit_price": 2.0,
+      "total": 4.0
+    }
+  ],
+  "subtotal": 40.38,
+  "tax": 3.03,
+  "shipping": null,
+  "discount": null,
+  "total": 43.41,
+  "currency": "USD",
+  "payment_method": "Card: VISA (ending in 4821)",
+  "notes": "PAYMENT METHOD:\nCard: VISA (ending in 4821)\nAuth Code: 049812\nAmount Paid: $43.41\nChange Due: $0.00\nTotal Items Sold: 9",
+  "validation": {
+    "is_valid": true,
+    "issues": []
+  }
+}

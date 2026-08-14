@@ -1,0 +1,54 @@
+{
+  "document_type": "receipt",
+  "vendor_name": null,
+  "vendor_address": null,
+  "customer_name": null,
+  "customer_address": null,
+  "document_id": "XX-XXXX-XX",
+  "date": null,
+  "due_date": null,
+  "line_items": [
+    {
+      "description": "LOVE",
+      "quantity": null,
+      "unit_price": null,
+      "total": 0.0
+    },
+    {
+      "description": "KINDNESS",
+      "quantity": null,
+      "unit_price": null,
+      "total": 0.0
+    },
+    {
+      "description": "EMPATHY",
+      "quantity": null,
+      "unit_price": null,
+      "total": 0.0
+    },
+    {
+      "description": "RESPECT",
+      "quantity": null,
+      "unit_price": null,
+      "total": 0.0
+    },
+    {
+      "description": "COMPASSION",
+      "quantity": null,
+      "unit_price": null,
+      "total": 0.0
+    }
+  ],
+  "subtotal": null,
+  "tax": null,
+  "shipping": null,
+  "discount": null,
+  "total": 0.0,
+  "currency": null,
+  "payment_method": null,
+  "notes": "KEEP THIS COPY",
+  "validation": {
+    "is_valid": true,
+    "issues": []
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "document_type": "invoice",
+  "vendor_name": "Innovus Tech",
+  "vendor_address": "67, Naviniman Society, Pratap Nagar, Nagpur, Maharashtra - 440022 India",
+  "customer_name": "Nike Inc.",
+  "customer_address": "Nike One Way, Hollywood Blv., Los Angeles, 110022 CA, USA",
+  "document_id": "INV-2024-052",
+  "date": "2024-09-14",
+  "due_date": "2024-09-21",
+  "line_items": [
+    {
+      "description": "Website Design",
+      "quantity": 1.0,
+      "unit_price": 50000.0,
+      "total": 50000.0
+    },
+    {
+      "description": "Website Development",
+      "quantity": 1.0,
+      "unit_price": 20000.0,
+      "total": 20000.0
+    },
+    {
+      "description": "UX Design",
+      "quantity": 1.0,
+      "unit_price": 20000.0,
+      "total": 20000.0
+    },
+    {
+      "description": "Website Copywriting",
+      "quantity": 1.0,
+      "unit_price": 10000.0,
+      "total": 10000.0
+    }
+  ],
+  "subtotal": 100000.0,
+  "tax": 9000.0,
+  "shipping": null,
+  "discount": null,
+  "total": 118000.0,
+  "currency": "INR",
+  "payment_method": "Cash",
+  "notes": null,
+  "validation": {
+    "is_valid": false,
+    "issues": [
+      {
+        "field": "total",
+        "severity": "error",
+        "message": "Grand total mismatch: Base (100000.00) + Tax (9000.00) + Shipping (0.00) - Discount (0.00) = 109000.00, but extracted total is 118000.00.",
+        "expected": "109000.00",
+        "actual": "118000.00"
+      }
+    ]
+  }
+}

@@ -1,5 +1,6 @@
 import argparse
 import sys
+import warnings
 from pathlib import Path
 import requests
 from rich.console import Console
@@ -7,6 +8,9 @@ from rich.panel import Panel
 from rich.table import Table
 from src.agent import DocumentExtractorAgent
 from src.schemas import DocumentExtraction
+
+# Suppress third-party PyTorch and deprecation library warnings
+warnings.filterwarnings("ignore")
 
 if hasattr(sys.stdout, "reconfigure"):
     try:
@@ -129,7 +133,7 @@ def main():
     extract_parser = subparsers.add_parser("extract", help="Extract and validate data from a single document")
     extract_parser.add_argument("file_path", type=str, help="Path to PDF, image, or text document")
     extract_parser.add_argument("--ollama-url", default="http://localhost:11434", help="Ollama server URL")
-    extract_parser.add_argument("--ocr-model", default="glm-ocr", help="OCR model tag")
+    extract_parser.add_argument("--ocr-model", default="glm-ocr:q8_0", help="OCR model tag")
     extract_parser.add_argument("--structure-model", default="qwen2.5:3b", help="Structuring model tag")
     extract_parser.add_argument("--output-dir", default="output", help="Directory to save JSON output")
 
@@ -139,14 +143,14 @@ def main():
     )
     extract_all_parser.add_argument("--samples-dir", default="sample_documents", help="Samples folder path")
     extract_all_parser.add_argument("--ollama-url", default="http://localhost:11434", help="Ollama server URL")
-    extract_all_parser.add_argument("--ocr-model", default="glm-ocr", help="OCR model tag")
+    extract_all_parser.add_argument("--ocr-model", default="glm-ocr:q8_0", help="OCR model tag")
     extract_all_parser.add_argument("--structure-model", default="qwen2.5:3b", help="Structuring model tag")
     extract_all_parser.add_argument("--output-dir", default="output", help="Directory to save JSON output")
 
     # Command: check-connection
     conn_parser = subparsers.add_parser("check-connection", help="Verify Ollama connection and model readiness")
     conn_parser.add_argument("--ollama-url", default="http://localhost:11434", help="Ollama server URL")
-    conn_parser.add_argument("--ocr-model", default="glm-ocr", help="OCR model tag")
+    conn_parser.add_argument("--ocr-model", default="glm-ocr:q8_0", help="OCR model tag")
     conn_parser.add_argument("--structure-model", default="qwen2.5:3b", help="Structuring model tag")
 
     args = parser.parse_args()
@@ -164,14 +168,29 @@ def main():
             console.print(f"[bold red]File not found:[/bold red] {file_path}")
             sys.exit(1)
 
-        console.print(f"[bold green]Starting extraction on:[/bold green] {file_path}")
+        console.print(f"[bold]Starting extraction on:[/bold] [cyan]{file_path}[/cyan]")
         agent = DocumentExtractorAgent(
             ollama_url=args.ollama_url,
             ocr_model=args.ocr_model,
             structure_model=args.structure_model,
         )
 
-        extraction, out_file = agent.process_and_save(file_path, output_dir=args.output_dir)
+        import time
+        start_time = time.time()
+        with console.status(
+            f"[bold cyan][Stage 1/4] Loading document {file_path.name}...",
+            spinner="dots",
+        ) as status:
+            def on_progress(stage: str, msg: str):
+                elapsed_sec = int(time.time() - start_time)
+                status.update(f"[bold cyan]{msg} [dim]({elapsed_sec}s elapsed)[/dim]")
+
+            extraction, out_file = agent.process_and_save(
+                file_path, output_dir=args.output_dir, progress_callback=on_progress
+            )
+
+        elapsed = time.time() - start_time
+        console.print(f"[dim green][DONE] Pipeline completed in {elapsed:.1f}s[/dim green]")
         display_extraction_result(extraction, out_file)
 
     elif args.command == "extract-all":
@@ -181,7 +200,26 @@ def main():
             sys.exit(1)
 
         files = sorted(
-            [f for f in samples_dir.iterdir() if f.suffix.lower() in [".pdf", ".png", ".jpg", ".jpeg", ".txt", ".csv"]]
+            [
+                f
+                for f in samples_dir.iterdir()
+                if f.suffix.lower()
+                in [
+                    ".pdf",
+                    ".png",
+                    ".jpg",
+                    ".jpeg",
+                    ".webp",
+                    ".bmp",
+                    ".tiff",
+                    ".txt",
+                    ".csv",
+                    ".tsv",
+                    ".md",
+                    ".xlsx",
+                    ".xls",
+                ]
+            ]
         )
 
         if not files:
@@ -195,10 +233,25 @@ def main():
             structure_model=args.structure_model,
         )
 
+        import time
         for file_path in files:
             console.rule(f"[bold]Processing {file_path.name}[/bold]")
+            file_start = time.time()
             try:
-                extraction, out_file = agent.process_and_save(file_path, output_dir=args.output_dir)
+                with console.status(
+                    f"[bold cyan][Stage 1/4] Loading {file_path.name}...",
+                    spinner="dots",
+                ) as status:
+                    def on_progress(stage: str, msg: str):
+                        elapsed_sec = int(time.time() - file_start)
+                        status.update(f"[bold cyan]{msg} [dim]({elapsed_sec}s elapsed)[/dim]")
+
+                    extraction, out_file = agent.process_and_save(
+                        file_path, output_dir=args.output_dir, progress_callback=on_progress
+                    )
+
+                elapsed = time.time() - file_start
+                console.print(f"[dim green][DONE] Completed in {elapsed:.1f}s[/dim green]")
                 display_extraction_result(extraction, out_file)
             except Exception as e:
                 console.print(f"[bold red]Failed to process {file_path.name}:[/bold red] {e}")

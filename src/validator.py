@@ -101,8 +101,13 @@ def validate_document(doc: DocumentExtraction) -> ValidationResult:
                 )
 
     # 3. Subtotal Consistency Check
+    abs_discount = abs(doc.discount) if doc.discount is not None else 0.0
     if doc.subtotal is not None and doc.line_items:
-        if abs(line_item_sum - doc.subtotal) > TOLERANCE:
+        # Match against either original subtotal or subtotal-after-discount
+        match_orig = abs(line_item_sum - doc.subtotal) <= TOLERANCE
+        match_discounted = abs(line_item_sum - abs_discount - doc.subtotal) <= TOLERANCE
+
+        if not (match_orig or match_discounted):
             issues.append(
                 ValidationIssue(
                     field="subtotal",
@@ -120,21 +125,27 @@ def validate_document(doc: DocumentExtraction) -> ValidationResult:
     effective_base = doc.subtotal if doc.subtotal is not None else line_item_sum
     tax = doc.tax if doc.tax is not None else 0.0
     shipping = doc.shipping if doc.shipping is not None else 0.0
-    discount = doc.discount if doc.discount is not None else 0.0
 
     if doc.total is not None and (doc.subtotal is not None or doc.line_items):
-        expected_grand_total = round(effective_base + tax + shipping - discount, 2)
-        if abs(expected_grand_total - doc.total) > TOLERANCE:
+        # Scenario A: subtotal before discount -> Base + Tax + Shipping - Discount = Total
+        expected_with_discount = round(effective_base + tax + shipping - abs_discount, 2)
+        # Scenario B: subtotal already net of discount -> Base + Tax + Shipping = Total
+        expected_net = round(effective_base + tax + shipping, 2)
+
+        if (
+            abs(expected_with_discount - doc.total) > TOLERANCE
+            and abs(expected_net - doc.total) > TOLERANCE
+        ):
             issues.append(
                 ValidationIssue(
                     field="total",
                     severity="error",
                     message=(
                         f"Grand total mismatch: Base ({effective_base:.2f}) + Tax ({tax:.2f}) + "
-                        f"Shipping ({shipping:.2f}) - Discount ({discount:.2f}) = {expected_grand_total:.2f}, "
+                        f"Shipping ({shipping:.2f}) - Discount ({abs_discount:.2f}) = {expected_with_discount:.2f}, "
                         f"but extracted total is {doc.total:.2f}."
                     ),
-                    expected=f"{expected_grand_total:.2f}",
+                    expected=f"{expected_with_discount:.2f}",
                     actual=f"{doc.total:.2f}",
                 )
             )

@@ -52,38 +52,39 @@ python main.py extract sample_documents/invoice_01.pdf
 ## 🏗️ Architecture
 
 ```
-   Document (PDF / Image / Text)
+   Document (PDF / Image / Excel / Text)
                │
                ▼
    ┌───────────────────────┐
-   │  1. PERCEIVE          │   PyMuPDF (fitz) renders PDF pages → PIL Images at 200 DPI
-   │  (document_loader.py) │   Images pass through; text files skip OCR
+   │  1. PERCEIVE          │   • PDFs: extracts native text or renders pages to PIL Images
+   │  (document_loader.py) │   • Excel (.xlsx/.xls): converts sheets into Markdown tables
+   │                       │   • Text (.txt/.csv/.md): reads directly (instant execution)
+   │                       │   • Images (.jpg/.png): passes PIL Images to OCR stage
    └───────────┬───────────┘
                │
                ▼
    ┌───────────────────────┐
-   │  2. OCR PERCEPTION    │   GLM-OCR (0.9B, ~2.5GB RAM) via Ollama
-   │  (ocr_client.py)      │   Converts image → structured Markdown (tables, key-values)
-   └───────────┬───────────┘   *num_ctx: 16384 set explicitly to prevent context overflow*
-               │
-               ▼
-   ┌───────────────────────┐
-   │  3. STRUCTURE ENGINE  │   Qwen2.5-3B (~2.0GB RAM) via Ollama
-   │  (structure_client.py)│   Markdown + Schema Prompt → Pydantic DocumentExtraction JSON
+   │  2. OCR PERCEPTION    │   GLM-OCR Q8 (glm-ocr:q8_0) via Ollama
+   │  (ocr_client.py)      │   (Fallback: local EasyOCR engine on CPU)
    └───────────┬───────────┘
                │
                ▼
    ┌───────────────────────┐
-   │  4. VALIDATION ENGINE │   Pure Python rule-based sanity checks (no LLM):
-   │  (validator.py)       │   • Line item math: qty × unit_price ≈ line_total (null-safe)
-   └───────────┬───────────┘   • Subtotal check: Σ line_totals ≈ subtotal (tol ±0.02)
-               │               • Grand total: subtotal + tax - discount ≈ total
-               │               • Date validity & chronology: due_date ≥ issue_date
+   │  3. STRUCTURING       │   Qwen 2.5 (qwen2.5:3b) via Ollama
+   │  (structure_client.py)│   Schema alignment into Pydantic DocumentExtraction
+   └───────────┬───────────┘
+               │
                ▼
    ┌───────────────────────┐
-   │  5. STRUCTURED OUTPUT │   Clean JSON output in output/ with embedded
-   │  (output/*.json)      │   ValidationResult (is_valid: bool, issues: [...])
-   └───────────────────────┘
+   │  4. VALIDATION        │   Pure Python rule-based sanity checks:
+   │  (validator.py)       │   • Line item math: (qty × unit_price == line_total)
+   │                       │   • Subtotal check: (Σ line_items == subtotal)
+   │                       │   • Grand total check: (subtotal + tax + shipping - discount == total)
+   │                       │   • Date logic: (valid calendar dates, due_date >= date)
+   └───────────┬───────────┘
+               │
+               ▼
+   Validated JSON Output (output/*.json) + Rich Terminal UI
 ```
 
 ---

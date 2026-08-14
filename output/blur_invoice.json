@@ -1,0 +1,42 @@
+{
+  "document_type": "invoice",
+  "vendor_name": "Margarita Perez",
+  "vendor_address": null,
+  "customer_name": "Rosee Miller",
+  "customer_address": null,
+  "document_id": "INVOICE No. 01234 - BILL#2.T2",
+  "date": "2030-01-29",
+  "due_date": null,
+  "line_items": [
+    {
+      "description": "Copywriting for 1 Blog",
+      "quantity": null,
+      "unit_price": 100.0,
+      "total": 100.0
+    },
+    {
+      "description": "10 Social Media Posts",
+      "quantity": null,
+      "unit_price": 100.0,
+      "total": 100.0
+    },
+    {
+      "description": "20 Hours Administration Work",
+      "quantity": null,
+      "unit_price": 400.0,
+      "total": 400.0
+    }
+  ],
+  "subtotal": 600.0,
+  "tax": null,
+  "shipping": null,
+  "discount": null,
+  "total": 600.0,
+  "currency": "USD",
+  "payment_method": null,
+  "notes": null,
+  "validation": {
+    "is_valid": true,
+    "issues": []
+  }
+}

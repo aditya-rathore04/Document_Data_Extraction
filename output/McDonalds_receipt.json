@@ -1,0 +1,36 @@
+{
+  "document_type": "receipt",
+  "vendor_name": "McDonald's",
+  "vendor_address": "2625F Weston Road, North York, M9N 3X2",
+  "customer_name": null,
+  "customer_address": null,
+  "document_id": "Order #416",
+  "date": "2026-02-17",
+  "due_date": null,
+  "line_items": [
+    {
+      "description": "1 Junior Chicken",
+      "quantity": 1.0,
+      "unit_price": 2.77,
+      "total": 2.77
+    },
+    {
+      "description": "OVO XXXL Cheese burger",
+      "quantity": 1.0,
+      "unit_price": 2.59,
+      "total": 2.59
+    }
+  ],
+  "subtotal": 5.36,
+  "tax": 0.63,
+  "shipping": null,
+  "discount": null,
+  "total": 5.99,
+  "currency": "CAD",
+  "payment_method": "Cash",
+  "notes": null,
+  "validation": {
+    "is_valid": true,
+    "issues": []
+  }
+}

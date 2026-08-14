@@ -1,5 +1,6 @@
 import json
 import re
+import html
 from typing import Optional
 import requests
 from pydantic import ValidationError
@@ -7,7 +8,7 @@ from src.schemas import DocumentExtraction, LineItem
 
 
 SYSTEM_PROMPT = """You are an expert financial and document data extraction assistant.
-Your task is to analyze the provided OCR markdown text of an invoice, receipt, or purchase order, and extract all key data fields into a clean, valid JSON object matching the requested schema.
+Your task is to analyze the provided OCR text of an invoice, receipt, or purchase order, and extract all key data fields into a clean, valid JSON object matching the requested schema.
 
 Schema requirements:
 {
@@ -32,17 +33,18 @@ Schema requirements:
   "shipping": float or null,
   "discount": float or null,
   "total": float or null,
-  "currency": "string or null (e.g. USD, EUR, INR, $)",
+  "currency": "string or null (e.g. USD, CAD, EUR, INR, $)",
   "payment_method": "string or null (e.g. Cash, Visa, Net30)",
   "notes": "string or null"
 }
 
-Important Rules:
-1. Return ONLY the raw JSON object. Do not wrap in markdown quotes if possible, and do not include conversational explanation.
-2. If a field is not present or cannot be determined with confidence, use null.
-3. Clean numeric fields: values should be pure floats (e.g. 120.50, not "$120.50").
-4. Extract all line items accurately. For receipts where unit price is omitted, leave unit_price as null and populate total.
-5. Standardize dates to YYYY-MM-DD whenever discernible.
+Critical Extraction Rules:
+1. Return ONLY the raw JSON object. Do not wrap in markdown quotes if possible, and do not include conversational text.
+2. Grouping & Line Items: For each numbered item (01, 02, 03, etc.), extract ONE line item where "description" is the full service/item name. The value in the PRICE/final column (e.g. $72.25, $46.75, $30.60) is the line item "total". Do NOT create separate line items for sub-bullet descriptions.
+3. Subtotal & Discount: Set "subtotal" to the subtotal amount (e.g. 149.60 or 176.00). If there is a discount, extract it as a POSITIVE number (e.g. 26.40, NEVER -26.40).
+4. Document Type: If the document is a store receipt or customer bill (or has "RECEIPT" header), set "document_type" to "receipt".
+5. Clean numeric fields: values must be pure numbers without currency symbols (e.g. 157.08, not "$157.08 CAD").
+6. Standardize dates to YYYY-MM-DD whenever discernible.
 """
 
 
@@ -53,11 +55,28 @@ class StructureClient:
         self,
         ollama_url: str = "http://localhost:11434",
         model: str = "qwen2.5:3b",
-        timeout: int = 60,
+        timeout: int = 120,
     ):
         self.ollama_url = ollama_url.rstrip("/")
         self.model = model
         self.timeout = timeout
+
+    def _preprocess_ocr_text(self, text: str) -> str:
+        """Cleans HTML tables and entities produced by vision models into clean text lines."""
+        # Unescape HTML entities (&amp;, &#39;, &lt;, etc.)
+        t = html.unescape(text)
+        # Replace <br> tags with space
+        t = re.sub(r"<br\s*/?>", " ", t, flags=re.IGNORECASE)
+        # Replace <tr> tags with newline
+        t = re.sub(r"</tr>", "\n", t, flags=re.IGNORECASE)
+        # Replace <td> and <th> tags with tab / space
+        t = re.sub(r"</t[dh]>", " | ", t, flags=re.IGNORECASE)
+        # Remove remaining HTML tags
+        t = re.sub(r"<[^>]+>", "", t)
+        # Clean multiple spaces and blank lines
+        lines = [re.sub(r"\s+", " ", line).strip() for line in t.splitlines()]
+        cleaned = "\n".join(line for line in lines if line)
+        return cleaned
 
     def _extract_json_substring(self, text: str) -> str:
         """Extracts JSON substring using regex or code-fence stripping."""
@@ -92,7 +111,8 @@ class StructureClient:
         """
         Takes raw markdown text from OCR or text input and parses it into a validated DocumentExtraction Pydantic model.
         """
-        user_prompt = f"Extract structured document data from the following OCR text:\n\n{markdown_text}"
+        cleaned_text = self._preprocess_ocr_text(markdown_text)
+        user_prompt = f"Extract structured document data from the following OCR text:\n\n{cleaned_text}"
 
         payload = {
             "model": self.model,

@@ -1,0 +1,42 @@
+{
+  "document_type": "invoice",
+  "vendor_name": "Jeff J Ritchie",
+  "vendor_address": "Sacramento, CA 95815",
+  "customer_name": null,
+  "customer_address": "White City, KS 66872",
+  "document_id": "PO-001",
+  "date": "2020-10-20",
+  "due_date": null,
+  "line_items": [
+    {
+      "description": "Brochure design",
+      "quantity": 1.0,
+      "unit_price": 50.0,
+      "total": 50.0
+    },
+    {
+      "description": "Ad design",
+      "quantity": 1.0,
+      "unit_price": 100.0,
+      "total": 100.0
+    },
+    {
+      "description": "Web design",
+      "quantity": 1.0,
+      "unit_price": 120.0,
+      "total": 120.0
+    }
+  ],
+  "subtotal": 270.0,
+  "tax": null,
+  "shipping": null,
+  "discount": null,
+  "total": 270.0,
+  "currency": null,
+  "payment_method": null,
+  "notes": "Total: 270",
+  "validation": {
+    "is_valid": true,
+    "issues": []
+  }
+}

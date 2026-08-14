@@ -1,0 +1,43 @@
+========================================
+            FRESH MARKET GROCERY        
+             123 Harvest Avenue         
+            Springfield, IL 62701       
+             Tel: (555) 019-2834        
+========================================
+
+Receipt #: 984210       Cashier: Alex M.
+Date: Aug 14, 2026      Time: 14:32:15
+Lane: 04
+
+----------------------------------------
+ITEM                                        QTY           PRICE
+----------------------------------------
+Organic Whole Milk (1 gal)    1      $4.29
+Whole Wheat Bread               1      $2.99
+Large Brown Eggs (12 pk)      1      $3.89
+Honeycrisp Apples (2.1 lb)    1      $5.23
+Boneless Chicken Breast      1      $8.99
+Olive Oil (500 ml)                   1      $7.49
+Baby Spinach (16 oz)            1      $3.49
+Dark Chocolate Bar              2      $4.00
+  (2 @ $2.00 each)
+----------------------------------------
+SUBTOTAL:                        $40.38
+TAX (7.5%):                       $3.03
+----------------------------------------
+TOTAL:                           $43.41
+
+PAYMENT METHOD:
+Card: VISA (ending in 4821)
+Auth Code: 049812
+Amount Paid:                     $43.41
+Change Due:                       $0.00
+
+----------------------------------------
+Total Items Sold: 9
+========================================
+        THANK YOU FOR SHOPPING!         
+        Keep receipt for returns        
+          within 30 days.               
+      Visit us at www.freshmarket.com   
+========================================

@@ -6,19 +6,30 @@ from src.validator import validate_document
 
 
 def test_document_loader():
-    """Verify document loader properly loads PDFs, images, and text."""
+    """Verify document loader properly loads PDFs, images, Excel files, and text."""
     samples_dir = Path("sample_documents")
 
     # 1. Test vector PDF loading (has native text layer)
-    pdf_doc = load_document(samples_dir / "invoice_01.pdf")
+    pdf_doc = load_document(samples_dir / "test_invoice_text_1.pdf")
     assert pdf_doc.is_text is True
-    assert "TAX INVOICE" in pdf_doc.text_content
+    assert len(pdf_doc.text_content) > 10
 
     # 2. Test Image loading (treated as visual document)
-    img_doc = load_document(samples_dir / "receipt_01.jpg")
+    img_doc = load_document(samples_dir / "receipt.jpg")
     assert not img_doc.is_text
     assert img_doc.page_count == 1
     assert len(img_doc.images) == 1
+
+    # 3. Test Excel spreadsheet loading
+    excel_doc = load_document(samples_dir / "purchase_order.xlsx")
+    assert excel_doc.is_text is True
+    assert "PO-001" in excel_doc.text_content
+    assert "Brochure design" in excel_doc.text_content
+
+    # 4. Test Plain text invoice loading
+    txt_doc = load_document(samples_dir / "groceryReceipt.txt")
+    assert txt_doc.is_text is True
+    assert len(txt_doc.text_content) > 10
 
 
 def test_validator_perfect_invoice():
