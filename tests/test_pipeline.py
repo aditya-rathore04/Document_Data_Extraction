@@ -1,0 +1,116 @@
+import pytest
+from pathlib import Path
+from src.document_loader import load_document
+from src.schemas import DocumentExtraction, LineItem
+from src.validator import validate_document
+
+
+def test_document_loader():
+    """Verify document loader properly loads PDFs, images, and text."""
+    samples_dir = Path("sample_documents")
+
+    # 1. Test PDF loading
+    pdf_doc = load_document(samples_dir / "invoice_01.pdf")
+    assert not pdf_doc.is_text
+    assert pdf_doc.page_count >= 1
+    assert len(pdf_doc.images) >= 1
+
+    # 2. Test Image loading
+    img_doc = load_document(samples_dir / "receipt_01.jpg")
+    assert not img_doc.is_text
+    assert img_doc.page_count == 1
+    assert len(img_doc.images) == 1
+
+
+def test_validator_perfect_invoice():
+    """Verify validator passes a completely consistent invoice."""
+    doc = DocumentExtraction(
+        document_type="invoice",
+        document_id="INV-100",
+        date="2024-05-10",
+        due_date="2024-06-10",
+        line_items=[
+            LineItem(description="Web Design", quantity=10, unit_price=50.0, total=500.0),
+            LineItem(description="Hosting", quantity=1, unit_price=100.0, total=100.0),
+        ],
+        subtotal=600.0,
+        tax=60.0,
+        discount=0.0,
+        total=660.0,
+        currency="USD",
+    )
+    result = validate_document(doc)
+    assert result.is_valid is True
+    assert len(result.issues) == 0
+
+
+def test_validator_line_item_math_mismatch():
+    """Verify validator detects line item quantity * price != total."""
+    doc = DocumentExtraction(
+        document_type="invoice",
+        document_id="INV-101",
+        date="2024-05-10",
+        line_items=[
+            # 2 * 50 should be 100, but total is 120
+            LineItem(description="Consulting", quantity=2, unit_price=50.0, total=120.0),
+        ],
+        subtotal=120.0,
+        total=120.0,
+    )
+    result = validate_document(doc)
+    assert result.is_valid is False
+    assert any("math mismatch" in issue.message for issue in result.issues)
+
+
+def test_validator_subtotal_mismatch():
+    """Verify validator detects when sum(line_items) != subtotal."""
+    doc = DocumentExtraction(
+        document_type="invoice",
+        document_id="INV-102",
+        date="2024-05-10",
+        line_items=[
+            LineItem(description="Item 1", quantity=1, unit_price=100.0, total=100.0),
+            LineItem(description="Item 2", quantity=1, unit_price=200.0, total=200.0),
+        ],
+        subtotal=250.0,  # Should be 300.0
+        total=250.0,
+    )
+    result = validate_document(doc)
+    assert result.is_valid is False
+    assert any("Subtotal mismatch" in issue.message for issue in result.issues)
+
+
+def test_validator_date_chronology_violation():
+    """Verify validator detects when due_date is before issue date."""
+    doc = DocumentExtraction(
+        document_type="invoice",
+        document_id="INV-103",
+        date="2024-06-15",
+        due_date="2024-06-01",  # Precedes issue date!
+        line_items=[
+            LineItem(description="Service", quantity=1, unit_price=100.0, total=100.0),
+        ],
+        subtotal=100.0,
+        total=100.0,
+    )
+    result = validate_document(doc)
+    assert result.is_valid is False
+    assert any("Date logic violation" in issue.message for issue in result.issues)
+
+
+def test_validator_null_safe_receipt():
+    """Verify validator passes receipts where unit_price is omitted."""
+    doc = DocumentExtraction(
+        document_type="receipt",
+        document_id="RCPT-001",
+        date="2024-05-10",
+        line_items=[
+            LineItem(description="Coffee", quantity=None, unit_price=None, total=4.50),
+            LineItem(description="Bagel", quantity=1, unit_price=None, total=3.50),
+        ],
+        subtotal=8.00,
+        tax=0.80,
+        total=8.80,
+    )
+    result = validate_document(doc)
+    assert result.is_valid is True
