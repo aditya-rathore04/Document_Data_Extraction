@@ -1,0 +1,78 @@
+{
+  "document_type": "invoice",
+  "vendor_name": null,
+  "vendor_address": null,
+  "customer_name": "Lisa Campbell",
+  "customer_address": "35271 Martin Turnpike Apt. 855, Georgefurt, IN 65801",
+  "document_id": "8218",
+  "date": "2021-12-08",
+  "due_date": null,
+  "line_items": [
+    {
+      "description": "Guest room",
+      "quantity": null,
+      "unit_price": 180.0,
+      "total": 180.0
+    },
+    {
+      "description": "Breakfast",
+      "quantity": null,
+      "unit_price": 30.0,
+      "total": 30.0
+    },
+    {
+      "description": "Taxi",
+      "quantity": null,
+      "unit_price": 90.0,
+      "total": 90.0
+    },
+    {
+      "description": "Guest room",
+      "quantity": null,
+      "unit_price": 180.0,
+      "total": 180.0
+    },
+    {
+      "description": "Breakfast",
+      "quantity": null,
+      "unit_price": 30.0,
+      "total": 30.0
+    },
+    {
+      "description": "Dinner",
+      "quantity": null,
+      "unit_price": 70.0,
+      "total": 70.0
+    },
+    {
+      "description": "Laundry",
+      "quantity": null,
+      "unit_price": 15.0,
+      "total": 15.0
+    },
+    {
+      "description": "Guest room",
+      "quantity": null,
+      "unit_price": 180.0,
+      "total": 180.0
+    },
+    {
+      "description": "Breakfast",
+      "quantity": null,
+      "unit_price": 30.0,
+      "total": 30.0
+    }
+  ],
+  "subtotal": 805.0,
+  "tax": 70.2,
+  "shipping": null,
+  "discount": 14.0,
+  "total": 861.2,
+  "currency": "USD",
+  "payment_method": null,
+  "notes": null,
+  "validation": {
+    "is_valid": true,
+    "issues": []
+  }
+}

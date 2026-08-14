@@ -5,7 +5,7 @@ echo ==============================================
 
 echo Checking / pulling Ollama models...
 ollama pull glm-ocr
-ollama pull qwen2.5:3b-instruct
+ollama pull qwen2.5:3b
 
 echo Installing dependencies...
 pip install -r requirements.txt --quiet

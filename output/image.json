@@ -1,0 +1,36 @@
+{
+  "document_type": "invoice",
+  "vendor_name": "Padilla-Miller",
+  "vendor_address": "53017 Lopez Locks, Alecborough, OH 49620, West Jason, CT 15849",
+  "customer_name": null,
+  "customer_address": null,
+  "document_id": "Invoice no: 81978187",
+  "date": "2013-01-17",
+  "due_date": null,
+  "line_items": [
+    {
+      "description": "Wine Bottle Holder",
+      "quantity": 5.0,
+      "unit_price": 10.75,
+      "total": 53.75
+    },
+    {
+      "description": "Cuisinart Stainless Steel Electric Wine Opener",
+      "quantity": 3.0,
+      "unit_price": 19.9,
+      "total": 59.7
+    }
+  ],
+  "subtotal": 113.45,
+  "tax": 11.34,
+  "shipping": null,
+  "discount": null,
+  "total": 124.79,
+  "currency": "$",
+  "payment_method": null,
+  "notes": null,
+  "validation": {
+    "is_valid": true,
+    "issues": []
+  }
+}

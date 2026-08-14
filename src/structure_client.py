@@ -29,6 +29,7 @@ Schema requirements:
   ],
   "subtotal": float or null,
   "tax": float or null,
+  "shipping": float or null,
   "discount": float or null,
   "total": float or null,
   "currency": "string or null (e.g. USD, EUR, INR, $)",
@@ -46,12 +47,12 @@ Important Rules:
 
 
 class StructureClient:
-    """Client for calling a text-only instruct LLM (e.g. qwen2.5:3b-instruct) to convert OCR markdown into structured JSON."""
+    """Client for calling a text-only instruct LLM (e.g. qwen2.5:3b) to convert OCR markdown into structured JSON."""
 
     def __init__(
         self,
         ollama_url: str = "http://localhost:11434",
-        model: str = "qwen2.5:3b-instruct",
+        model: str = "qwen2.5:3b",
         timeout: int = 60,
     ):
         self.ollama_url = ollama_url.rstrip("/")

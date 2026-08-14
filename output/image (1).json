@@ -1,0 +1,70 @@
+{
+  "document_type": "invoice",
+  "vendor_name": "Nicholson, Miller and Webster",
+  "vendor_address": "USS Lee, 22688 Ortiz Plaza, FPO AE 74393, Meganfort, WA 91964",
+  "customer_name": "Mccormick and Sons",
+  "customer_address": null,
+  "document_id": "Invoice no: 13407985",
+  "date": "2013-11-22",
+  "due_date": null,
+  "line_items": [
+    {
+      "description": "Adult Kids Pokemon Pikachu",
+      "quantity": 5.0,
+      "unit_price": 9.95,
+      "total": 49.75
+    },
+    {
+      "description": "Kigurumi Pajama Cosplay, Christmas Costume Sleepwear",
+      "quantity": 2.0,
+      "unit_price": 49.96,
+      "total": 149.88
+    },
+    {
+      "description": "Dress 22W Floral Cottagecore, balmain dress 36",
+      "quantity": 3.0,
+      "unit_price": 1550.0,
+      "total": 5115.0
+    },
+    {
+      "description": "Lilly Pulitzer 8 Sunkissed with Glow Janice Shift Dress",
+      "quantity": 2.0,
+      "unit_price": 56.89,
+      "total": 113.78
+    }
+  ],
+  "subtotal": 4963.41,
+  "tax": 496.34,
+  "shipping": null,
+  "discount": null,
+  "total": 5459.75,
+  "currency": "$",
+  "payment_method": null,
+  "notes": null,
+  "validation": {
+    "is_valid": false,
+    "issues": [
+      {
+        "field": "line_items[2]",
+        "severity": "error",
+        "message": "Line item 2 ('Kigurumi Pajama Cosplay, Christmas Costume Sleepwear') math mismatch: quantity (2.0) × unit_price (49.96) = 99.92, but extracted line total is 149.88.",
+        "expected": "99.92",
+        "actual": "149.88"
+      },
+      {
+        "field": "line_items[3]",
+        "severity": "error",
+        "message": "Line item 3 ('Dress 22W Floral Cottagecore, balmain dress 36') math mismatch: quantity (3.0) × unit_price (1550.0) = 4650.0, but extracted line total is 5115.0.",
+        "expected": "4650.00",
+        "actual": "5115.00"
+      },
+      {
+        "field": "subtotal",
+        "severity": "error",
+        "message": "Subtotal mismatch: Sum of extracted line items (5428.41) does not equal extracted subtotal (4963.41).",
+        "expected": "5428.41",
+        "actual": "4963.41"
+      }
+    ]
+  }
+}

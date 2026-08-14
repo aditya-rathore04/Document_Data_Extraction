@@ -8,13 +8,19 @@ from rich.table import Table
 from src.agent import DocumentExtractorAgent
 from src.schemas import DocumentExtraction
 
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 console = Console()
 
 
 def display_extraction_result(doc: DocumentExtraction, output_path: Path):
     """Renders a formatted rich terminal summary of the extraction and validation."""
     # Main Document Information Table
-    info_table = Table(title="📄 Extracted Document Information", show_header=True, header_style="bold magenta")
+    info_table = Table(title="[DOC] Extracted Document Information", show_header=True, header_style="bold magenta")
     info_table.add_column("Field", style="cyan", width=20)
     info_table.add_column("Extracted Value", style="white")
 
@@ -28,6 +34,7 @@ def display_extraction_result(doc: DocumentExtraction, output_path: Path):
     info_table.add_row("Currency", doc.currency or "[italic dim]None[/italic dim]")
     info_table.add_row("Subtotal", f"{doc.subtotal:.2f}" if doc.subtotal is not None else "[italic dim]None[/italic dim]")
     info_table.add_row("Tax", f"{doc.tax:.2f}" if doc.tax is not None else "[italic dim]None[/italic dim]")
+    info_table.add_row("Shipping", f"{doc.shipping:.2f}" if doc.shipping is not None else "[italic dim]None[/italic dim]")
     info_table.add_row("Discount", f"{doc.discount:.2f}" if doc.discount is not None else "[italic dim]None[/italic dim]")
     info_table.add_row("Grand Total", f"[bold green]{doc.total:.2f}[/bold green]" if doc.total is not None else "[bold red]None[/bold red]")
     info_table.add_row("Saved JSON", f"[green]{output_path}[/green]")
@@ -36,7 +43,7 @@ def display_extraction_result(doc: DocumentExtraction, output_path: Path):
 
     # Line Items Table
     if doc.line_items:
-        items_table = Table(title="🛒 Extracted Line Items", show_header=True, header_style="bold blue")
+        items_table = Table(title="[ITEMS] Extracted Line Items", show_header=True, header_style="bold blue")
         items_table.add_column("#", justify="right", width=4)
         items_table.add_column("Description", style="white")
         items_table.add_column("Qty", justify="right", style="cyan")
@@ -55,22 +62,22 @@ def display_extraction_result(doc: DocumentExtraction, output_path: Path):
         val = doc.validation
         if val.is_valid:
             status_panel = Panel(
-                "[bold green]✓ ALL SANITY CHECKS PASSED[/bold green]\n"
-                "• Line items math verified\n"
-                "• Subtotal & total consistency verified\n"
-                "• Date logic verified",
-                title="🔍 Validation Status",
+                "[bold green][PASS] ALL SANITY CHECKS PASSED[/bold green]\n"
+                "* Line items math verified\n"
+                "* Subtotal & total consistency verified\n"
+                "* Date logic verified",
+                title="[VALIDATION] Status",
                 border_style="green",
             )
             console.print(status_panel)
         else:
             issues_text = "\n".join(
-                f"[bold red]• [{issue.severity.upper()}] {issue.field}:[/bold red] {issue.message}"
+                f"[bold red]* [{issue.severity.upper()}] {issue.field}:[/bold red] {issue.message}"
                 for issue in val.issues
             )
             status_panel = Panel(
-                f"[bold red]✗ VALIDATION ISSUES DETECTED[/bold red]\n\n{issues_text}",
-                title="🔍 Validation Status",
+                f"[bold red][FAIL] VALIDATION ISSUES DETECTED[/bold red]\n\n{issues_text}",
+                title="[VALIDATION] Status",
                 border_style="red",
             )
             console.print(status_panel)
@@ -84,7 +91,7 @@ def check_connection(ollama_url: str, ocr_model: str, structure_model: str):
         resp.raise_for_status()
         models = [m.get("name") for m in resp.json().get("models", [])]
 
-        table = Table(title="🤖 Ollama Model Status", show_header=True, header_style="bold green")
+        table = Table(title="[STATUS] Ollama Model Status", show_header=True, header_style="bold green")
         table.add_column("Required Role", style="cyan")
         table.add_column("Target Model", style="white")
         table.add_column("Status", style="bold")
@@ -123,7 +130,7 @@ def main():
     extract_parser.add_argument("file_path", type=str, help="Path to PDF, image, or text document")
     extract_parser.add_argument("--ollama-url", default="http://localhost:11434", help="Ollama server URL")
     extract_parser.add_argument("--ocr-model", default="glm-ocr", help="OCR model tag")
-    extract_parser.add_argument("--structure-model", default="qwen2.5:3b-instruct", help="Structuring model tag")
+    extract_parser.add_argument("--structure-model", default="qwen2.5:3b", help="Structuring model tag")
     extract_parser.add_argument("--output-dir", default="output", help="Directory to save JSON output")
 
     # Command: extract-all
@@ -133,14 +140,14 @@ def main():
     extract_all_parser.add_argument("--samples-dir", default="sample_documents", help="Samples folder path")
     extract_all_parser.add_argument("--ollama-url", default="http://localhost:11434", help="Ollama server URL")
     extract_all_parser.add_argument("--ocr-model", default="glm-ocr", help="OCR model tag")
-    extract_all_parser.add_argument("--structure-model", default="qwen2.5:3b-instruct", help="Structuring model tag")
+    extract_all_parser.add_argument("--structure-model", default="qwen2.5:3b", help="Structuring model tag")
     extract_all_parser.add_argument("--output-dir", default="output", help="Directory to save JSON output")
 
     # Command: check-connection
     conn_parser = subparsers.add_parser("check-connection", help="Verify Ollama connection and model readiness")
     conn_parser.add_argument("--ollama-url", default="http://localhost:11434", help="Ollama server URL")
     conn_parser.add_argument("--ocr-model", default="glm-ocr", help="OCR model tag")
-    conn_parser.add_argument("--structure-model", default="qwen2.5:3b-instruct", help="Structuring model tag")
+    conn_parser.add_argument("--structure-model", default="qwen2.5:3b", help="Structuring model tag")
 
     args = parser.parse_args()
 

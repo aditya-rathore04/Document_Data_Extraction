@@ -20,9 +20,9 @@ class DocumentExtractorAgent:
         self,
         ollama_url: str = "http://localhost:11434",
         ocr_model: str = "glm-ocr",
-        structure_model: str = "qwen2.5:3b-instruct",
-        ocr_timeout: int = 120,
-        structure_timeout: int = 60,
+        structure_model: str = "qwen2.5:3b",
+        ocr_timeout: int = 300,
+        structure_timeout: int = 120,
     ):
         self.ollama_url = ollama_url
         self.ocr_client = OCRClient(

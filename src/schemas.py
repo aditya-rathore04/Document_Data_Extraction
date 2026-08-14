@@ -40,6 +40,7 @@ class DocumentExtraction(BaseModel):
     line_items: list[LineItem] = Field(default_factory=list, description="List of extracted line items")
     subtotal: Optional[float] = Field(default=None, description="Subtotal amount before tax/discounts")
     tax: Optional[float] = Field(default=None, description="Tax or VAT amount")
+    shipping: Optional[float] = Field(default=None, description="Shipping or freight charge")
     discount: Optional[float] = Field(default=None, description="Discount amount applied")
     total: Optional[float] = Field(default=None, description="Grand total amount")
     currency: Optional[str] = Field(default=None, description="Currency symbol or code (e.g. USD, EUR, INR, $)")

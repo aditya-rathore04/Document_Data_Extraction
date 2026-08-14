@@ -33,10 +33,10 @@ class LoadedDocument:
         )
 
 
-def load_document(file_path: Union[str, Path], dpi: int = 200) -> LoadedDocument:
+def load_document(file_path: Union[str, Path], dpi: int = 120) -> LoadedDocument:
     """
     Loads a PDF, image, or text file and converts it into standard format:
-    - PDF: Renders pages into PIL Images at specified DPI (default 200).
+    - PDF: Renders pages into PIL Images at specified DPI (default 120).
     - Image: Opens as PIL Image (converted to RGB).
     - Text/CSV: Reads raw text directly.
     """
@@ -55,17 +55,34 @@ def load_document(file_path: Union[str, Path], dpi: int = 200) -> LoadedDocument
     # 2. PDF Document
     if ext == ".pdf":
         doc = pymupdf.open(path)
+        extracted_text_pages: List[str] = []
         images: List[Image.Image] = []
         zoom = dpi / 72.0
         mat = pymupdf.Matrix(zoom, zoom)
 
         for page_num in range(len(doc)):
             page = doc[page_num]
+            text = page.get_text().strip()
+            if text:
+                extracted_text_pages.append(f"--- Page {page_num + 1} ---\n{text}")
+
             pix = page.get_pixmap(matrix=mat, alpha=False)
             img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
             images.append(img)
 
         doc.close()
+
+        # If PDF has native selectable text, use it directly (super fast & accurate)
+        full_pdf_text = "\n\n".join(extracted_text_pages).strip()
+        if len(full_pdf_text) > 30:
+            return LoadedDocument(
+                file_path=path,
+                is_text=True,
+                text_content=full_pdf_text,
+                images=images,
+            )
+
+        # Scanned PDF without text layer: return rendered images for OCR
         return LoadedDocument(file_path=path, is_text=False, images=images)
 
     # 3. Image file

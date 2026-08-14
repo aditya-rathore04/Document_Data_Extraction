@@ -119,18 +119,19 @@ def validate_document(doc: DocumentExtraction) -> ValidationResult:
     # 4. Grand Total Consistency Check
     effective_base = doc.subtotal if doc.subtotal is not None else line_item_sum
     tax = doc.tax if doc.tax is not None else 0.0
+    shipping = doc.shipping if doc.shipping is not None else 0.0
     discount = doc.discount if doc.discount is not None else 0.0
 
     if doc.total is not None and (doc.subtotal is not None or doc.line_items):
-        expected_grand_total = round(effective_base + tax - discount, 2)
+        expected_grand_total = round(effective_base + tax + shipping - discount, 2)
         if abs(expected_grand_total - doc.total) > TOLERANCE:
             issues.append(
                 ValidationIssue(
                     field="total",
                     severity="error",
                     message=(
-                        f"Grand total mismatch: Base ({effective_base:.2f}) + Tax ({tax:.2f}) - "
-                        f"Discount ({discount:.2f}) = {expected_grand_total:.2f}, "
+                        f"Grand total mismatch: Base ({effective_base:.2f}) + Tax ({tax:.2f}) + "
+                        f"Shipping ({shipping:.2f}) - Discount ({discount:.2f}) = {expected_grand_total:.2f}, "
                         f"but extracted total is {doc.total:.2f}."
                     ),
                     expected=f"{expected_grand_total:.2f}",

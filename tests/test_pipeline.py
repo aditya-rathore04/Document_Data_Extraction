@@ -9,13 +9,12 @@ def test_document_loader():
     """Verify document loader properly loads PDFs, images, and text."""
     samples_dir = Path("sample_documents")
 
-    # 1. Test PDF loading
+    # 1. Test vector PDF loading (has native text layer)
     pdf_doc = load_document(samples_dir / "invoice_01.pdf")
-    assert not pdf_doc.is_text
-    assert pdf_doc.page_count >= 1
-    assert len(pdf_doc.images) >= 1
+    assert pdf_doc.is_text is True
+    assert "TAX INVOICE" in pdf_doc.text_content
 
-    # 2. Test Image loading
+    # 2. Test Image loading (treated as visual document)
     img_doc = load_document(samples_dir / "receipt_01.jpg")
     assert not img_doc.is_text
     assert img_doc.page_count == 1

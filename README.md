@@ -68,7 +68,7 @@ python main.py extract sample_documents/invoice_01.pdf
                │
                ▼
    ┌───────────────────────┐
-   │  3. STRUCTURE ENGINE  │   Qwen2.5-3B-Instruct (~2.0GB RAM) via Ollama
+   │  3. STRUCTURE ENGINE  │   Qwen2.5-3B (~2.0GB RAM) via Ollama
    │  (structure_client.py)│   Markdown + Schema Prompt → Pydantic DocumentExtraction JSON
    └───────────┬───────────┘
                │
@@ -90,9 +90,9 @@ python main.py extract sample_documents/invoice_01.pdf
 
 ## 💡 Key Design Decisions & Tradeoffs
 
-1. **Why Split OCR (`glm-ocr`) and Structuring (`qwen2.5:3b-instruct`):**
+1. **Why Split OCR (`glm-ocr`) and Structuring (`qwen2.5:3b`):**
    - **`glm-ocr` (0.9B)** is SOTA at document OCR and table recognition from images, but its small decoder is not built for complex arbitrary JSON instruction-following.
-   - **`qwen2.5:3b-instruct` (3B)** is fast and accurate at mapping text to a strict Pydantic JSON schema.
+   - **`qwen2.5:3b` (3B)** is fast and accurate at mapping text to a strict Pydantic JSON schema.
    - Splitting them into two specialized models achieves higher accuracy and runs comfortably on standard CPU hardware (**~4.5GB total RAM**) without requiring a heavy 8B+ VLM.
 
 2. **Crucial Context Window Requirement (`num_ctx: 16384`):**

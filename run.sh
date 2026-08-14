@@ -4,7 +4,7 @@ set -e
 echo "=== Document Data Extractor Agent ==="
 echo "Pulling required Ollama models (if missing)..."
 ollama pull glm-ocr 2>/dev/null || true
-ollama pull qwen2.5:3b-instruct 2>/dev/null || true
+ollama pull qwen2.5:3b 2>/dev/null || true
 
 echo "Installing Python dependencies..."
 pip install -r requirements.txt --quiet
