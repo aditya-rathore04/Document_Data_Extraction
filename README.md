@@ -179,33 +179,35 @@ python -m json.tool output/purchase_order.json
 
 ```mermaid
 flowchart TD
-    A[Input Document] --> B{Format Router}
-    
-    B -->|Native Text PDF| C1[PyMuPDF Vector Text Extractor]
-    B -->|Scanned PDF / Image| C2[Render PIL Images @ 120 DPI]
-    B -->|Excel .xlsx / .xls| C3[openpyxl Sheet Table Converter]
-    B -->|Plain Text / CSV| C4[Direct UTF-8 Text Reader]
-    
-    C1 --> E[Markdown / Text Flow]
-    C3 --> E
-    C4 --> E
-    
-    C2 --> D{GLM-OCR Q8 via Ollama}
-    D -->|Success| E
-    D -->|Ollama Exception / Timeout| F[Local CPU EasyOCR Fallback]
-    F --> E
-    
-    E --> G[Qwen 2.5 3B Structuring Engine]
-    G --> H[Pydantic v2 DocumentExtraction Schema]
-    
-    H --> I[Deterministic Rule-Based Validation Engine]
-    I -->|Line Item Math Check| J[ValidationResult]
-    I -->|Subtotal & Tax Consistency| J
-    I -->|Grand Total Check| J
-    I -->|Date Chronology Check| J
-    
-    J --> K[JSON File Output output/*.json]
-    J --> L[Rich Progressive CLI Display]
+    subgraph S1["1. PERCEIVE & INGEST"]
+        A["Input Document"] --> B{"Format Router"}
+        B -->|"Native Text PDF"| C1["PyMuPDF Vector Text Extractor"]
+        B -->|"Scanned PDF / Image"| C2["Render PIL Image @ 120 DPI"]
+        B -->|"Excel .xlsx / .xls"| C3["openpyxl Sheet Table Converter"]
+        B -->|"Plain Text / CSV"| C4["Direct UTF-8 Text Reader"]
+    end
+
+    subgraph S2["2. OCR PERCEPTION"]
+        C2 --> D{"GLM-OCR Q8 via Ollama"}
+        D -->|"Success"| E["Markdown / Text Representation"]
+        D -->|"Ollama Exception / Timeout"| F["Local CPU EasyOCR Fallback"]
+        F --> E
+        C1 --> E
+        C3 --> E
+        C4 --> E
+    end
+
+    subgraph S3["3. STRUCTURING"]
+        E --> G["Qwen 2.5 3B Structuring Engine"]
+        G --> H["Pydantic v2 DocumentExtraction Schema"]
+    end
+
+    subgraph S4["4. VALIDATION & OUTPUT"]
+        H --> I["Deterministic Rule-Based Validator<br/>- Line item math check<br/>- Subtotal & tax consistency<br/>- Grand total formula check<br/>- Date chronology check"]
+        I --> J["ValidationResult Schema"]
+        J --> K["JSON File Output (output/*.json)"]
+        J --> L["Rich Progressive CLI Display"]
+    end
 ```
 
 ---
