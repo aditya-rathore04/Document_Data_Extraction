@@ -1,12 +1,12 @@
 {
-  "document_type": "invoice",
+  "document_type": "purchase_order",
   "vendor_name": "Jeff J Ritchie",
   "vendor_address": "Sacramento, CA 95815",
   "customer_name": null,
   "customer_address": null,
-  "document_id": "PO-001",
+  "document_id": "Purchase order# - PO-001",
   "date": "2020-10-20",
-  "due_date": null,
+  "due_date": "2020-10-20",
   "line_items": [
     {
       "description": "Brochure design",

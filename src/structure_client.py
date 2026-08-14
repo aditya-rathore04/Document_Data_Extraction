@@ -43,7 +43,11 @@ Critical Extraction Rules:
 2. Grouping & Line Items: For each numbered item (01, 02, 03, etc.), extract ONE line item where "description" is the full service/item name. The value in the PRICE/final column (e.g. $72.25, $46.75, $30.60) is the line item "total". Do NOT create separate line items for sub-bullet descriptions.
 3. Subtotal & Discount: Set "subtotal" to the subtotal amount (e.g. 149.60 or 176.00). If there is a discount, extract it as a POSITIVE number (e.g. 26.40, NEVER -26.40).
 4. Tax & Split Taxes: If multiple tax lines exist (e.g. CGST 9000 + SGST 9000, or State + Federal Tax), sum all tax amounts together into the "tax" field (e.g. 18000.0).
-5. Document Type: If the document is a store receipt or customer bill (or has "RECEIPT" header), set "document_type" to "receipt".
+5. Document Type Classification (MUST BE ACCURATE):
+   - "purchase_order": If the document header or title says "PURCHASE ORDER", "PO #", "P.O.", or contains an order number like "PO-001". (Note: Ignore generic spreadsheet sheet names like 'Sheet: Sales Invoice Template' if the actual text header is PURCHASE ORDER).
+   - "receipt": If the document is a retail checkout slip, restaurant bill, fast food order (e.g. McDonald's), cafe register slip, supermarket receipt, or has a "RECEIPT" header.
+   - "invoice": If the document is a formal billing invoice with "INVOICE", "Tax Invoice", payment due date, or B2B vendor bill.
+   - "unknown": If it cannot be determined.
 6. Clean numeric fields: values must be pure numbers without currency symbols (e.g. 157.08, not "$157.08 CAD").
 7. Standardize dates to YYYY-MM-DD whenever discernible.
 """
@@ -140,6 +144,29 @@ class StructureClient:
             # Clean and extract JSON string
             json_str = self._extract_json_substring(raw_response)
             parsed_dict = json.loads(json_str)
+
+            # Deterministic classification refinement
+            doc_id = str(parsed_dict.get("document_id") or "").lower()
+            vendor = str(parsed_dict.get("vendor_name") or "").lower()
+            text_lower = cleaned_text.lower()
+
+            if (
+                "purchase order" in text_lower
+                or "po #" in text_lower
+                or "purchase order" in doc_id
+                or doc_id.startswith("po-")
+                or "po-" in doc_id
+            ):
+                parsed_dict["document_type"] = "purchase_order"
+            elif (
+                "receipt" in text_lower
+                or "mcdonald" in vendor
+                or "mcdonald" in text_lower
+                or "cashier" in text_lower
+                or "order number" in text_lower
+            ):
+                if parsed_dict.get("document_type") != "purchase_order":
+                    parsed_dict["document_type"] = "receipt"
 
             # Validate against Pydantic schema
             return DocumentExtraction.model_validate(parsed_dict)
