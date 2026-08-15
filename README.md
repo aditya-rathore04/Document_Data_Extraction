@@ -2,15 +2,182 @@
 
 > An intelligent, privacy-first **Perceive -> OCR -> Structure -> Validate** pipeline that extracts structured JSON from invoices, receipts, and purchase orders using local Ollama models with deterministic rule-based validation (zero cloud API dependencies).
 
+### Supported Document Formats
+- **PDFs (`.pdf`)**: Native text or scanned documents.
+- **Images (`.png`, `.jpg`, `.jpeg`, `.webp`, `.bmp`, `.tiff`)**: Receipts and document scans processed with OCR.
+- **Spreadsheets (`.xlsx`, `.xls`, `.xlsm`)**: Workbooks converted to Markdown tables.
+- **Text files (`.txt`, `.csv`, `.tsv`, `.md`, `.json`, `.log`)**: Plain and structured text documents.
+
 ---
 
-## 30-Second Review
+## Table of Contents
+- [Installation & Quick Setup](#installation--quick-setup)
+  - [Quick Setup (1-Click Automated Launchers)](#quick-setup-1-click-automated-launchers)
+  - [Step-by-Step Setup](#step-by-step-setup)
+  - [System Requirements](#system-requirements)
+- [Usage & 30-Second Review](#usage--30-second-review)
+  - [End-to-End Walkthrough (Prompt to Final Output)](#end-to-end-walkthrough-prompt-to-final-output)
+  - [Inlined Worked Example: Invoice_image.pdf](#inlined-worked-example-invoice_imagepdf)
+  - [Multi-Document Results Table (All 6 Sample Files)](#multi-document-results-table-all-6-sample-files)
+  - [CLI Command Reference](#cli-command-reference)
+- [Architecture](#architecture)
+- [Design Decisions & Tradeoffs](#design-decisions--tradeoffs)
+- [Testing](#testing)
+- [Limitations & Known Failure Cases](#limitations--known-failure-cases)
+- [Future Improvements](#future-improvements)
+- [Repository Structure](#repository-structure)
 
-Reviewers can evaluate the end-to-end capabilities, schema fidelity, and validation behavior directly from this section without configuring local dependencies.
+---
 
-### 1. Inlined Worked Example: `Invoice_image.pdf`
+## Installation & Quick Setup
 
-Below is the verbatim extraction output from [`output/Invoice_image.json`](output/Invoice_image.json), generated from a scanned Indian corporate tax invoice ([`sample_documents/Invoice_image.pdf`](sample_documents/Invoice_image.pdf)):
+### Quick Setup (1-Click Automated Launchers)
+Automated scripts pull the required models, install Python packages, and process all sample documents in a single command:
+- **Windows**: Double-click or run [`run.bat`](run.bat)
+- **Linux / macOS**: Run `bash run.sh`
+
+---
+
+### Step-by-Step Setup
+
+If you prefer to configure each step manually:
+
+1. **Verify Ollama is Installed and Running**:
+   ```bash
+   ollama --version
+   ```
+   *(If not installed, download the desktop application from [ollama.com](https://ollama.com) and start it).*
+
+2. **Pull the Required Quantized Models**:
+   ```bash
+   ollama pull glm-ocr:q8_0
+   ollama pull qwen2.5:3b
+   ```
+
+3. **Install Python Dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Verify Environment Connection**:
+   ```bash
+   python main.py check-connection
+   ```
+
+---
+
+### System Requirements
+
+- **Operating System**: Windows 10/11, macOS, or Linux.
+- **Python Version**: Python 3.10+ (tested on Python 3.11.5).
+- **Ollama Engine**: Local Ollama server running at `http://localhost:11434`.
+- **Local Model Weights**:
+  - `glm-ocr:q8_0` (1.6 GB disk space)
+  - `qwen2.5:3b` (1.9 GB disk space)
+  - *Total model storage footprint*: ~3.5 GB.
+- **Hardware**: 8 GB RAM minimum (runs comfortably on CPU). GPU acceleration is supported if available but not required.
+- **Privacy**: 100% local execution — zero external API keys, zero cloud transmission, zero per-page fees.
+
+---
+
+## Usage & 30-Second Review
+
+This section walks you step-by-step through a complete run: from launching a command in the terminal to inspecting the progressive checklist, terminal tables, and saved JSON payload.
+
+### End-to-End Walkthrough (Prompt to Final Output)
+
+#### Step 1: Check Model Readiness
+Run `python main.py check-connection` to verify that Ollama is active and both models are loaded.
+
+```
+┌───────────────────────────────────────────────────────────────────────────┐
+│                                                                           │
+│  [AGENT] DOCUMENT DATA EXTRACTOR                                          │
+│  Local, privacy-first Perceive -> OCR -> Structure -> Validate pipeline   │
+│                                                                           │
+│    * Perception:  GLM-OCR (glm-ocr:q8_0) + Vector PyMuPDF                 │
+│    * Structuring: Qwen 2.5 (qwen2.5:3b) + Pydantic v2 Schema              │
+│    * Validation:  Deterministic Financial & Date Integrity Engine         │
+│    * Runtime:     100% Local Inference via Ollama (Zero Cloud API Costs)  │
+│                                                                           │
+└───────────────────────────────────────────────────────────────────────────┘
+       [STATUS] Ollama Model Readiness        
+┌────────────────────┬──────────────┬────────┐
+│ Required Role      │ Target Model │ Status │
+├────────────────────┼──────────────┼────────┤
+│ Perception (OCR)   │ glm-ocr:q8_0 │ Ready  │
+│ Structuring (JSON) │ qwen2.5:3b   │ Ready  │
+└────────────────────┴──────────────┴────────┘
+```
+<!-- TODO: screenshot of check-connection terminal panel, insert here -->
+
+#### Step 2: Execute Extraction with Live Progressive Checklist
+Run extraction on a single document:
+```bash
+python main.py extract sample_documents/Invoice_image.pdf
+```
+
+While computing, the terminal displays an active spinner with real-time timers. As each stage finishes, it freezes into a permanent checklist line:
+
+```
+[AGENT] Processing document: Invoice_image.pdf
+
+  [PASS] [1/4] Document loaded (1 page) (0.05s)
+  [PASS] [2/4] GLM-OCR perception completed (1 page) (41.20s)
+  [PASS] [3/4] JSON fields structured (4 line items) (66.85s)
+  [PASS] [4/4] Validation finished (1 issue(s) detected) (0.00s)
+
+[DONE] Invoice_image.pdf processed in 108.4s (Load: 0.05s | OCR: 41.2s | Structure: 66.9s | Validate: 0.00s)
+```
+<!-- TODO: screenshot of live progressive terminal checklist, insert here -->
+
+#### Step 3: Terminal Display (Fields, Line Items & Validation Panel)
+The agent prints formatted tables for instant human inspection:
+
+```
+        [DOC] Extracted Document Information         
+┌──────────────────────┬─────────────────────────────────────────────────────────────────────────┐
+│ Field                │ Extracted Value                                                         │
+├──────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+│ Document Type        │ INVOICE                                                                 │
+│ Document ID          │ INV-2024-052                                                            │
+│ Vendor Name          │ Innovus Tech                                                            │
+│ Vendor Address       │ 67, Naviniman Society, Pratap Nagar, Nagpur, Maharashtra - 440022 India │
+│ Customer Name        │ Nike Inc.                                                               │
+│ Date                 │ 2024-09-14                                                              │
+│ Due Date             │ 2024-09-21                                                              │
+│ Currency             │ INR                                                                     │
+│ Subtotal             │ 100000.00                                                               │
+│ Tax                  │ 9000.00                                                                 │
+│ Shipping             │ None                                                                    │
+│ Discount             │ None                                                                    │
+│ Grand Total          │ 118000.00                                                               │
+│ Saved JSON           │ output\Invoice_image.json                                               │
+└──────────────────────┴─────────────────────────────────────────────────────────────────────────┘
+             [ITEMS] Extracted Line Items             
+┌──────┬─────────────────────┬─────┬────────────┬──────────┐
+│    # │ Description         │ Qty │ Unit Price │    Total │
+├──────┼─────────────────────┼─────┼────────────┼──────────┤
+│    1 │ Website Design      │ 1.0 │   50000.00 │ 50000.00 │
+│    2 │ Website Development │ 1.0 │   20000.00 │ 20000.00 │
+│    3 │ UX Design           │ 1.0 │   20000.00 │ 20000.00 │
+│    4 │ Website Copywriting │ 1.0 │   10000.00 │ 10000.00 │
+└──────┴─────────────────────┴─────┴────────────┴──────────┘
+┌─────────────────────────── [VALIDATION] Status ───────────────────────────┐
+│ [FAIL] VALIDATION ISSUES DETECTED                                         │
+│                                                                           │
+│ * [ERROR] total: Grand total mismatch: Base (100000.00) + Tax (9000.00)   │
+│   + Shipping (0.00) - Discount (0.00) = 109000.00, but extracted total is │
+│   118000.00.                                                              │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+<!-- TODO: screenshot of extracted document info table & validation panel, insert here -->
+
+---
+
+### Inlined Worked Example: `Invoice_image.pdf`
+
+Below is the verbatim JSON output written to [`output/Invoice_image.json`](output/Invoice_image.json):
 
 ```json
 {
@@ -72,15 +239,15 @@ Below is the verbatim extraction output from [`output/Invoice_image.json`](outpu
 ```
 
 #### Why the Validation Flagged This (And Why It Proves the System Works)
-The scanned invoice contains an Indian GST split-tax breakdown: **Subtotal ₹100,000 + CGST (9%) ₹9,000 + SGST (9%) ₹9,000 = Grand Total ₹118,000**. The text structuring model extracted the first tax line (`tax: 9000.0`) but omitted the secondary SGST component. 
+The scanned invoice contains an Indian GST split-tax breakdown: **Subtotal ₹100,000 + CGST (9%) ₹9,000 + SGST (9%) ₹9,000 = Grand Total ₹118,000**. The text structuring model mapped the first tax line (`tax: 9000.0`) but omitted the secondary SGST component.
 
-Rather than silently accepting this mismatch and passing corrupted financial data into an ERP system, the deterministic validation engine detected that $\text{Base (100,000.00)} + \text{Tax (9,000.00)} = 109,000.00 \neq 118,000.00$ and flagged the discrepancy in the output payload.
+Rather than silently accepting this mismatch and passing corrupted financial figures into an ERP system, the deterministic validation engine detected that $\text{Base (100,000.00)} + \text{Tax (9,000.00)} = 109,000.00 \neq 118,000.00$ and flagged the discrepancy in the output payload.
 
 ---
 
-### 2. Multi-Document Test Results (All 6 Sample Documents)
+### Multi-Document Results Table (All 6 Sample Files)
 
-The table below reflects the exact output from running `python main.py extract-all` across all documents in [`sample_documents/`](sample_documents/):
+Run `python main.py extract-all` to process every sample document in [`sample_documents/`](sample_documents/) and generate the summary table:
 
 | Filename | Format | Document Type | Vendor | Total | Status | Issues | Distinct Layout & Perception Notes |
 | :--- | :--- | :--- | :--- | :---: | :---: | :---: | :--- |
@@ -91,87 +258,34 @@ The table below reflects the exact output from running `python main.py extract-a
 | [`purchase_order.xlsx`](sample_documents/purchase_order.xlsx) | Excel (.xlsx) | `purchase_order` | Jeff J Ritchie | 270.00 | `[PASS]` | 0 | Multi-column spreadsheet PO (PO-001); openpyxl converted non-empty rows into clean Markdown tables. |
 | [`test_invoice_text_1.pdf`](sample_documents/test_invoice_text_1.pdf) | Vector PDF | `invoice` | - | USD 861.20 | `[PASS]` | 0 | Digital PDF with native text layer; PyMuPDF extracted text directly, structuring 9 hotel line items. |
 
-- Raw JSON outputs are saved in [`output/`](output/):
-  - [`output/blur_invoice.json`](output/blur_invoice.json)
-  - [`output/groceryReceipt.json`](output/groceryReceipt.json)
-  - [`output/Invoice_image.json`](output/Invoice_image.json)
-  - [`output/McDonalds_receipt.json`](output/McDonalds_receipt.json)
-  - [`output/purchase_order.json`](output/purchase_order.json)
-  - [`output/test_invoice_text_1.json`](output/test_invoice_text_1.json)
+- Raw JSON outputs are available in the [`output/`](output/) folder.
 - Full documentation on error isolation and failure cases: [`docs/validation_and_failures.md`](docs/validation_and_failures.md)
 
-<!-- TODO: screenshot of summary table, insert here -->
+<!-- TODO: screenshot of final batch summary table, insert here -->
 
 ---
 
-## Why Fully Local / Zero Cloud API Keys
+### CLI Command Reference
 
-This system requires **no API keys, no account signups, and zero third-party cloud connections**. 
-
-Financial documents such as vendor invoices, employee expense receipts, and purchase orders contain confidential data (banking details, addresses, tax IDs, and commercial pricing). Running 100% on-device via local Ollama inference ensures that sensitive documents never leave the local environment while eliminating recurring API processing costs.
-
----
-
-## System Requirements
-
-- **Operating System**: Windows 10/11, macOS, or Linux.
-- **Python Version**: Python 3.10+ (tested on Python 3.11.5).
-- **Ollama Engine**: Local Ollama server running at `http://localhost:11434`.
-- **Local Model Weights**:
-  - `glm-ocr:q8_0` (1.6 GB disk space)
-  - `qwen2.5:3b` (1.9 GB disk space)
-  - *Total model storage footprint*: ~3.5 GB.
-- **Hardware**: 8 GB RAM minimum (runs comfortably on CPU). GPU acceleration is supported if available but not required.
-
----
-
-## Installation & Running
-
-### Step-by-Step Setup
-
-1. **Verify Ollama is Installed and Running**:
-   ```bash
-   ollama --version
-   ```
-   *(If not installed, download from [ollama.com](https://ollama.com) and start the application).*
-
-2. **Pull the Required Quantized Models**:
-   ```bash
-   ollama pull glm-ocr:q8_0
-   ollama pull qwen2.5:3b
-   ```
-
-3. **Install Python Dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Verify Environment Readiness**:
-   ```bash
-   python main.py check-connection
-   ```
-
-5. **Extract Data from a Single Document**:
-   ```bash
-   python main.py extract sample_documents/purchase_order.xlsx
-   ```
-
-6. **Batch Process All Sample Documents**:
-   ```bash
-   python main.py extract-all
-   ```
-
-### 1-Command Automated Launchers
-- **Windows**: Run [`run.bat`](run.bat)
-- **Linux / macOS**: Run `bash run.sh`
-
-### Inspecting Output JSON
-All extraction results are saved to the `output/` folder. You can format and inspect them directly in your terminal:
 ```bash
+# Display help and command usage
+python main.py -h
+
+# Check local Ollama connection and model readiness
+python main.py check-connection
+
+# Extract and validate a single document
+python main.py extract sample_documents/purchase_order.xlsx
+
+# Batch extract all documents in sample_documents/
+python main.py extract-all
+
+# Specify a custom output directory
+python main.py extract sample_documents/receipt.jpg --output-dir my_extractions/
+
+# Format and view saved output JSON directly in terminal
 python -m json.tool output/purchase_order.json
 ```
-
-<!-- TODO: screenshot of terminal extraction output, insert here -->
 
 ---
 
@@ -214,24 +328,50 @@ flowchart TD
 
 ## Design Decisions & Tradeoffs
 
-1. **Two-Stage Specialized Architecture (`glm-ocr:q8_0` + `qwen2.5:3b`)**:
-   - Document OCR and JSON structuring require distinct capabilities. `glm-ocr:q8_0` (0.9B) is specialized for visual layout comprehension and OCR table transcription, while `qwen2.5:3b` (3B) is trained on structured text-to-JSON schema mapping.
-   - Splitting perception and structuring into two compact models allows the pipeline to run on commodity CPU hardware (~3.5 GB model weights) without requiring a heavy 8B+ vision-language model.
+1. **Two-Stage Pipeline (`glm-ocr:q8_0` + `qwen2.5:3b`)**:
+   - `glm-ocr:q8_0` handles image-based text and layout extraction. `qwen2.5:3b` is used as a general-purpose text model to map the OCR output to the extraction schema as JSON.
+   - Separating these stages keeps the models compact enough for commodity CPU hardware (~3.5 GB of model weights).
 
 2. **Explicit Context Window Configuration (`num_ctx: 10240`)**:
-   - In [`src/ocr_client.py`](src/ocr_client.py), `num_ctx` is explicitly set to `10240`. Ollama's default context of `4096` causes visual token truncation on dense, full-page invoices.
+   - [`src/ocr_client.py`](src/ocr_client.py) sets `num_ctx` to `10240` to reduce truncation on dense, full-page invoices.
 
-3. **Fault-Tolerant EasyOCR Fallback**:
-   - In [`src/ocr_client.py`](src/ocr_client.py), if Ollama encounters a network timeout, socket disconnect, or server error, the client catches the exception and immediately invokes a local EasyOCR reader on CPU to prevent crashing the batch.
+3. **Best-Effort EasyOCR Fallback**:
+   - If the Ollama OCR request fails or returns no text, [`src/ocr_client.py`](src/ocr_client.py) attempts local CPU-based EasyOCR.
 
 4. **Excel Spreadsheet Ingestion (`openpyxl`)**:
-   - In [`src/document_loader.py`](src/document_loader.py), `_load_excel_as_markdown` iterates through worksheet cells and filters out empty formula columns and blank rows before generating Markdown tables. This prevents prompt token bloat on template spreadsheets with hundreds of empty cells.
+   - [`src/document_loader.py`](src/document_loader.py) converts non-empty worksheet rows into compact Markdown, reducing prompt size for sparse templates.
 
 5. **Deterministic Rule-Based Validation**:
-   - In [`src/validator.py`](src/validator.py), all financial arithmetic, tax reconciliation, and date logic checks are implemented in pure Python. Relying on an LLM to "self-validate" its own math introduces hallucination risk; deterministic code guarantees reproducible audit trails.
+   - [`src/validator.py`](src/validator.py) performs financial arithmetic, tax, and date checks in pure Python for reproducible results.
 
 6. **Null-Safe Line Item Arithmetic**:
-   - Retail receipts often omit per-item unit prices and quantities (e.g. coffee listed simply as `$4.50`). The line item validator only triggers quantity $\times$ unit price checks when both fields are explicitly present, avoiding false-positive errors on receipts.
+   - Quantity $\times$ unit-price checks run only when both values are present, avoiding false positives on receipts that provide only an item total.
+
+---
+
+## Testing
+
+The test suite covers document loading for PDF, image, Excel, and text files; OCR text preprocessing; financial arithmetic; discount and shipping calculations; date validation; and null-safe receipt line items.
+
+### Running Unit Tests
+
+```bash
+# Run from the repository root
+python -m pytest tests/
+```
+
+The current suite contains 8 tests. Runtime and detailed output may vary by environment.
+
+### Example Output
+
+```text
+============================= test session starts =============================
+collected 8 items
+
+tests\test_pipeline.py ........                                          [100%]
+
+============================== 8 passed in 1.40s ==============================
+```
 
 ---
 
@@ -240,9 +380,9 @@ flowchart TD
 1. **Small Structuring Model Capacity (`qwen2.5:3b`)**:
    - `qwen2.5:3b` is optimized for speed and low memory footprint on local hardware. While `glm-ocr` reliably transcribes complex visual layouts, the 3B model can occasionally miss fields or drop secondary table rows on highly unconventional layouts.
 2. **Multi-Table Invoice Boundaries**:
-   - Invoices containing multiple separate item tables (e.g. materials vs. labor) are transcribed accurately by OCR, but the structuring prompt currently aggregates them into a single linear list.
-3. **Collapsing Split Tax Components**:
-   - As demonstrated in `Invoice_image.pdf`, invoices with split tax lines (e.g. Indian CGST 9% + SGST 9%) may have only one component mapped to the scalar `tax` field by the model, which is then flagged by the validation engine.
+   - If an invoice has separate tables, such as materials and labor, the structuring stage may combine all items into one list.
+3. **Limited Tax Breakdown Representation**:
+   - The schema stores tax as one value, so detailed GST components such as CGST and SGST cannot be represented or explained separately.
 4. **Execution Throughput on CPU**:
    - Single-threaded local inference on CPU takes between **24s and 108s per document** (totaling ~6.3 minutes for the 6 sample documents). Processing a batch of 50 documents on CPU would take approximately 45–60 minutes.
 5. **Language and Quality Constraints**:
@@ -255,38 +395,18 @@ flowchart TD
 
 > *Note: The items below are not currently implemented and are documented as scoped future architectural enhancements.*
 
+- **Image Preprocessing**:
+  - Add deskewing, denoising, contrast enhancement, orientation detection, and adaptive resizing before OCR to improve results on photographed or degraded documents.
 - **Pipelined / Overlapped Asynchronous Execution**:
-  - Because `glm-ocr:q8_0` (1.6 GB) and `qwen2.5:3b` (1.9 GB) fit concurrently within system memory, the agent could overlap execution (running OCR on document $N+1$ in a background thread while structuring document $N$).
+  - Because `glm-ocr:q8_0` (1.6 GB) and `qwen2.5:3b` (1.9 GB) fit concurrently within system memory, the agent could overlap execution by running OCR on document $N+1$ while structuring document $N$.
+- **Confidence Scores and Field Provenance**:
+  - Record confidence scores, source pages, and optionally the supporting OCR text for each extracted field.
+- **Human Review Workflow**:
+  - Allow users to review and correct low-confidence fields or validation failures before exporting results.
 - **Multi-Tax Component Schema Extension**:
-  - Extending the Pydantic schema from a scalar `tax: float` to a structured `taxes: list[TaxComponent]` (e.g. CGST, SGST, VAT, State, Federal) to represent split-tax jurisdictions.
+  - Extend the scalar `tax: float` field to a structured `taxes: list[TaxComponent]` model for components such as CGST, SGST, VAT, state tax, and federal tax.
 - **Dynamic Few-Shot Prompt Routing**:
-  - Dynamically injecting few-shot layout examples into the structuring prompt based on the detected document domain (hospitality, logistics, retail, legal).
-
----
-
-## Testing
-
-The project includes an automated test suite verifying document ingestion, HTML table preprocessing, mathematical sanity checks, discount/shipping arithmetic, and date chronology.
-
-### Running Unit Tests
-
-```bash
-python -m pytest tests/
-```
-
-### Actual Test Suite Output
-
-```
-============================= test session starts =============================
-platform win32 -- Python 3.11.5, pytest-7.1.2, pluggy-1.6.0
-rootdir: C:\Users\adity\Document_Data_Extraction
-plugins: anyio-4.13.0
-collected 8 items
-
-tests\test_pipeline.py ........                                          [100%]
-
-============================== 8 passed in 0.67s ==============================
-```
+  - Inject layout examples into the structuring prompt based on the detected document domain, such as hospitality, logistics, or retail.
 
 ---
 
