@@ -34,7 +34,7 @@
   "total": 270.0,
   "currency": null,
   "payment_method": null,
-  "notes": "Total: 270",
+  "notes": "Total",
   "validation": {
     "is_valid": true,
     "issues": []

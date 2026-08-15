@@ -88,160 +88,32 @@ This section walks you step-by-step through a complete run: from launching a com
 
 #### Step 1: Check Model Readiness
 Run `python main.py check-connection` to verify that Ollama is active and both models are loaded.
-
-```
-┌───────────────────────────────────────────────────────────────────────────┐
-│                                                                           │
-│  [AGENT] DOCUMENT DATA EXTRACTOR                                          │
-│  Local, privacy-first Perceive -> OCR -> Structure -> Validate pipeline   │
-│                                                                           │
-│    * Perception:  GLM-OCR (glm-ocr:q8_0) + Vector PyMuPDF                 │
-│    * Structuring: Qwen 2.5 (qwen2.5:3b) + Pydantic v2 Schema              │
-│    * Validation:  Deterministic Financial & Date Integrity Engine         │
-│    * Runtime:     100% Local Inference via Ollama (Zero Cloud API Costs)  │
-│                                                                           │
-└───────────────────────────────────────────────────────────────────────────┘
-       [STATUS] Ollama Model Readiness        
-┌────────────────────┬──────────────┬────────┐
-│ Required Role      │ Target Model │ Status │
-├────────────────────┼──────────────┼────────┤
-│ Perception (OCR)   │ glm-ocr:q8_0 │ Ready  │
-│ Structuring (JSON) │ qwen2.5:3b   │ Ready  │
-└────────────────────┴──────────────┴────────┘
-```
-<!-- TODO: screenshot of check-connection terminal panel, insert here -->
+![Check Connection](docs/images/check_conection.png)
 
 #### Step 2: Execute Extraction with Live Progressive Checklist
 Run extraction on a single document:
+#### The Document - McDonald's Receipt
+![McDonald's Receipt.jpg](docs/images/McDonalds_receipt.jpg)
 ```bash
 python main.py extract sample_documents/Invoice_image.pdf
 ```
 
 While computing, the terminal displays an active spinner with real-time timers. As each stage finishes, it freezes into a permanent checklist line:
 
-```
-[AGENT] Processing document: Invoice_image.pdf
-
-  [PASS] [1/4] Document loaded (1 page) (0.05s)
-  [PASS] [2/4] GLM-OCR perception completed (1 page) (41.20s)
-  [PASS] [3/4] JSON fields structured (4 line items) (66.85s)
-  [PASS] [4/4] Validation finished (1 issue(s) detected) (0.00s)
-
-[DONE] Invoice_image.pdf processed in 108.4s (Load: 0.05s | OCR: 41.2s | Structure: 66.9s | Validate: 0.00s)
-```
-<!-- TODO: screenshot of live progressive terminal checklist, insert here -->
+![Execution GIF](docs/images/execution.gif)
 
 #### Step 3: Terminal Display (Fields, Line Items & Validation Panel)
 The agent prints formatted tables for instant human inspection:
 
-```
-        [DOC] Extracted Document Information         
-┌──────────────────────┬─────────────────────────────────────────────────────────────────────────┐
-│ Field                │ Extracted Value                                                         │
-├──────────────────────┼─────────────────────────────────────────────────────────────────────────┤
-│ Document Type        │ INVOICE                                                                 │
-│ Document ID          │ INV-2024-052                                                            │
-│ Vendor Name          │ Innovus Tech                                                            │
-│ Vendor Address       │ 67, Naviniman Society, Pratap Nagar, Nagpur, Maharashtra - 440022 India │
-│ Customer Name        │ Nike Inc.                                                               │
-│ Date                 │ 2024-09-14                                                              │
-│ Due Date             │ 2024-09-21                                                              │
-│ Currency             │ INR                                                                     │
-│ Subtotal             │ 100000.00                                                               │
-│ Tax                  │ 9000.00                                                                 │
-│ Shipping             │ None                                                                    │
-│ Discount             │ None                                                                    │
-│ Grand Total          │ 118000.00                                                               │
-│ Saved JSON           │ output\Invoice_image.json                                               │
-└──────────────────────┴─────────────────────────────────────────────────────────────────────────┘
-             [ITEMS] Extracted Line Items             
-┌──────┬─────────────────────┬─────┬────────────┬──────────┐
-│    # │ Description         │ Qty │ Unit Price │    Total │
-├──────┼─────────────────────┼─────┼────────────┼──────────┤
-│    1 │ Website Design      │ 1.0 │   50000.00 │ 50000.00 │
-│    2 │ Website Development │ 1.0 │   20000.00 │ 20000.00 │
-│    3 │ UX Design           │ 1.0 │   20000.00 │ 20000.00 │
-│    4 │ Website Copywriting │ 1.0 │   10000.00 │ 10000.00 │
-└──────┴─────────────────────┴─────┴────────────┴──────────┘
-┌─────────────────────────── [VALIDATION] Status ───────────────────────────┐
-│ [FAIL] VALIDATION ISSUES DETECTED                                         │
-│                                                                           │
-│ * [ERROR] total: Grand total mismatch: Base (100000.00) + Tax (9000.00)   │
-│   + Shipping (0.00) - Discount (0.00) = 109000.00, but extracted total is │
-│   118000.00.                                                              │
-└───────────────────────────────────────────────────────────────────────────┘
-```
-<!-- TODO: screenshot of extracted document info table & validation panel, insert here -->
-
+![Terminal Display](docs/images/Terminal_Display_Fields.png)
 ---
 
 ### Inlined Worked Example: `Invoice_image.pdf`
 
-Below is the verbatim JSON output written to [`output/Invoice_image.json`](output/Invoice_image.json):
+Below is the verbatim JSON output written to [`output/McDonalds_receipt.json`](output/McDonalds_receipt.json):
 
-```json
-{
-  "document_type": "invoice",
-  "vendor_name": "Innovus Tech",
-  "vendor_address": "67, Naviniman Society, Pratap Nagar, Nagpur, Maharashtra - 440022 India",
-  "customer_name": "Nike Inc.",
-  "customer_address": "Nike One Way, Hollywood Blv., Los Angeles, 110022 CA, USA",
-  "document_id": "INV-2024-052",
-  "date": "2024-09-14",
-  "due_date": "2024-09-21",
-  "line_items": [
-    {
-      "description": "Website Design",
-      "quantity": 1.0,
-      "unit_price": 50000.0,
-      "total": 50000.0
-    },
-    {
-      "description": "Website Development",
-      "quantity": 1.0,
-      "unit_price": 20000.0,
-      "total": 20000.0
-    },
-    {
-      "description": "UX Design",
-      "quantity": 1.0,
-      "unit_price": 20000.0,
-      "total": 20000.0
-    },
-    {
-      "description": "Website Copywriting",
-      "quantity": 1.0,
-      "unit_price": 10000.0,
-      "total": 10000.0
-    }
-  ],
-  "subtotal": 100000.0,
-  "tax": 9000.0,
-  "shipping": null,
-  "discount": null,
-  "total": 118000.0,
-  "currency": "INR",
-  "payment_method": "Cash",
-  "notes": null,
-  "validation": {
-    "is_valid": false,
-    "issues": [
-      {
-        "field": "total",
-        "severity": "error",
-        "message": "Grand total mismatch: Base (100000.00) + Tax (9000.00) + Shipping (0.00) - Discount (0.00) = 109000.00, but extracted total is 118000.00.",
-        "expected": "109000.00",
-        "actual": "118000.00"
-      }
-    ]
-  }
-}
-```
+![McDonalds json](docs/images/McDJSON.png)
 
-#### Why the Validation Flagged This (And Why It Proves the System Works)
-The scanned invoice contains an Indian GST split-tax breakdown: **Subtotal ₹100,000 + CGST (9%) ₹9,000 + SGST (9%) ₹9,000 = Grand Total ₹118,000**. The text structuring model mapped the first tax line (`tax: 9000.0`) but omitted the secondary SGST component.
-
-Rather than silently accepting this mismatch and passing corrupted financial figures into an ERP system, the deterministic validation engine detected that $\text{Base (100,000.00)} + \text{Tax (9,000.00)} = 109,000.00 \neq 118,000.00$ and flagged the discrepancy in the output payload.
 
 ---
 
@@ -249,14 +121,7 @@ Rather than silently accepting this mismatch and passing corrupted financial fig
 
 Run `python main.py extract-all` to process every sample document in [`sample_documents/`](sample_documents/) and generate the summary table:
 
-| Filename | Format | Document Type | Vendor | Total | Status | Issues | Distinct Layout & Perception Notes |
-| :--- | :--- | :--- | :--- | :---: | :---: | :---: | :--- |
-| [`blur_invoice.png`](sample_documents/blur_invoice.png) | PNG Image | `invoice` | Margarita Perez | USD 600.00 | `[PASS]` | 0 | Deliberately blurred/low-contrast scan; GLM-OCR perception resolved all 3 line items and matched the total. |
-| [`groceryReceipt.txt`](sample_documents/groceryReceipt.txt) | Plain Text | `receipt` | FRESH MARKET GROCERY | USD 43.41 | `[PASS]` | 0 | Unstructured ASCII register text; direct text ingestion bypassed OCR, parsing 8 items with sales tax. |
-| [`Invoice_image.pdf`](sample_documents/Invoice_image.pdf) | Scanned PDF | `invoice` | Innovus Tech | INR 118000.00 | `[ISSUES]` | 1 | Multi-tax Indian GST invoice; validator caught unmapped SGST tax component. |
-| [`McDonalds_receipt.jpg`](sample_documents/McDonalds_receipt.jpg) | JPG Photo | `receipt` | McDonald's | CAD 5.99 | `[PASS]` | 0 | Fast-food photo receipt; extracted 2 line items, subtotal, tax, and order identifier. |
-| [`purchase_order.xlsx`](sample_documents/purchase_order.xlsx) | Excel (.xlsx) | `purchase_order` | Jeff J Ritchie | 270.00 | `[PASS]` | 0 | Multi-column spreadsheet PO (PO-001); openpyxl converted non-empty rows into clean Markdown tables. |
-| [`test_invoice_text_1.pdf`](sample_documents/test_invoice_text_1.pdf) | Vector PDF | `invoice` | - | USD 861.20 | `[PASS]` | 0 | Digital PDF with native text layer; PyMuPDF extracted text directly, structuring 9 hotel line items. |
+![Batch Execution](docs/images/Multi_Doc_Result_table.png)
 
 - Raw JSON outputs are available in the [`output/`](output/) folder.
 - Full documentation on error isolation and failure cases: [`docs/validation_and_failures.md`](docs/validation_and_failures.md)

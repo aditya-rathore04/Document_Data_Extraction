@@ -26,7 +26,7 @@
   "shipping": null,
   "discount": null,
   "total": 5.99,
-  "currency": "CAD",
+  "currency": "USD",
   "payment_method": "Cash",
   "notes": null,
   "validation": {

@@ -1,10 +1,10 @@
 {
   "document_type": "invoice",
-  "vendor_name": "Margarita Perez",
-  "vendor_address": null,
-  "customer_name": "Rosee Miller",
-  "customer_address": "hello@meatygreatsite.com",
-  "document_id": "INVOICE No. 01234 - BILL#2.T2",
+  "vendor_name": "Rosee Miller",
+  "vendor_address": "hello@meatygreatsite.com",
+  "customer_name": "Margarita Perez",
+  "customer_address": "012340678901",
+  "document_id": "INVOICE No. 01234",
   "date": "2030-01-29",
   "due_date": null,
   "line_items": [
@@ -33,8 +33,8 @@
   "discount": null,
   "total": 600.0,
   "currency": "USD",
-  "payment_method": "PayPal",
-  "notes": null,
+  "payment_method": "Scan the QR code to pay",
+  "notes": "Email me at hello@meatygreatsite.com",
   "validation": {
     "is_valid": true,
     "issues": []
