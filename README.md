@@ -95,7 +95,7 @@ Run extraction on a single document:
 #### The Document - McDonald's Receipt
 ![McDonald's Receipt.jpg](docs/images/McDonalds_receipt.jpg)
 ```bash
-python main.py extract sample_documents/Invoice_image.pdf
+python main.py extract sample_documents/McDonalds_receipt.jpg
 ```
 
 While computing, the terminal displays an active spinner with real-time timers. As each stage finishes, it freezes into a permanent checklist line:
