@@ -208,6 +208,7 @@ flowchart TD
 
 5. **Deterministic Rule-Based Validation**:
    - [`src/validator.py`](src/validator.py) performs financial arithmetic, tax, and date checks in pure Python for reproducible results.
+   - the ['invoice_validation_case_study.md'](docs/casestudy/invoice_validation_case_study.md) shows this perfectly 
 
 6. **Null-Safe Line Item Arithmetic**:
    - Quantity $\times$ unit-price checks run only when both values are present, avoiding false positives on receipts that provide only an item total.
@@ -248,6 +249,7 @@ tests\test_pipeline.py ........                                          [100%]
    - If an invoice has separate tables, such as materials and labor, the structuring stage may combine all items into one list.
 3. **Limited Tax Breakdown Representation**:
    - The schema stores tax as one value, so detailed GST components such as CGST and SGST cannot be represented or explained separately.
+   - Read ['invoice_validation_case_study.md'](docs/casestudy/invoice_validation_case_study.md) for a better understanding through an example.
 4. **Execution Throughput on CPU**:
    - Single-threaded local inference on CPU takes between **24s and 108s per document** (totaling ~6.3 minutes for the 6 sample documents). Processing a batch of 50 documents on CPU would take approximately 45–60 minutes.
 5. **Language and Quality Constraints**:
