@@ -108,9 +108,9 @@ The agent prints formatted tables for instant human inspection:
 ![Terminal Display](docs/images/Terminal_Display_Fields.png)
 ---
 
-### Inlined Worked Example: `Invoice_image.pdf`
+### Worked Example: `McDonalds_receipt.jpg`
 
-Below is the verbatim JSON output written to [`output/McDonalds_receipt.json`](output/McDonalds_receipt.json):
+Below is the extracted JSON output for `McDonalds_receipt.jpg`, written to [`output/McDonalds_receipt.json`](output/McDonalds_receipt.json):
 
 ![McDonalds json](docs/images/McDJSON.png)
 
